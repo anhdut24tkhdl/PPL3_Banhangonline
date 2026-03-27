@@ -1,0 +1,20 @@
+﻿@model List<PPL3_Banhangonline.Models.Category>
+
+<h2>DANH MỤC</h2>
+
+@if (Model != null && Model.Any())
+{
+    foreach (var item in Model)
+    {
+        <div style="border:1px solid red; margin:10px; padding:10px;">
+            <p>ID: @item.CategoryID</p>
+            <p>Tên: @item.CategoryName</p>
+            <p>Ảnh: @item.Image</p>
+            <img src="https://suckhoedoisong.qltns.mediacdn.vn/324455921873985536/2024/1/13/rau-cai-cay-1705113818591127379333.jpg" />
+        </div>
+    }
+}
+else
+{
+    <p>Model đang null hoặc không có dữ liệu</p>
+}
