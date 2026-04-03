@@ -16,7 +16,8 @@ builder.Services.AddScoped<CloudinaryService>();
 // Session + HttpContextAccessor
 builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();
-
+builder.Services.AddScoped<AIService>();
+builder.Services.AddHttpClient();
 var app = builder.Build();
 
 app.UseHttpsRedirection();

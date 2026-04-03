@@ -149,6 +149,7 @@ namespace PPL3_Banhangonline.Controllers
             product.Stock = model.Stock;
             product.Image = model.Image;
             product.CategoryID = model.CategoryID;
+            
 
             _context.SaveChanges();
 
@@ -197,6 +198,21 @@ namespace PPL3_Banhangonline.Controllers
             _context.SaveChanges();
 
             return RedirectToAction("Index");
+        }
+
+        public IActionResult ByCategory(int id)
+        {
+            var category = _context.Categories.FirstOrDefault(c => c.CategoryID == id);
+
+            var products = _context.Products
+                .Include(p => p.Shop)
+                .ThenInclude(s => s.Seller)
+                .Where(p => p.CategoryID == id)
+                .ToList();
+
+            ViewBag.CategoryName = category?.CategoryName;
+
+            return View(products);  
         }
     }
 }

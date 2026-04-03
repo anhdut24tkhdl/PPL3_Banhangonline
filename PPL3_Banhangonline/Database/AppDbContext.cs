@@ -29,9 +29,9 @@ namespace PPL3_Banhangonline.Database
        
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<CartItem>()
-                .Property(c => c.Price)
-                .HasPrecision(18, 2);
+            //modelBuilder.Entity<CartItem>()
+            //    .Property(c => c.Price)
+            //    .HasPrecision(18, 2);
 
             modelBuilder.Entity<Order>()
                 .Property(o => o.TotalAmount)
@@ -57,6 +57,9 @@ namespace PPL3_Banhangonline.Database
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Seller> Sellers { get; set; }
         public DbSet<Shop> Shops { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        
+        public DbSet<CartItem> CartItems { get; set; }
 
         public object Accounts { get; internal set; }
     }
