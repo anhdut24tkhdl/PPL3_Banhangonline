@@ -16,6 +16,7 @@
         <table class="category-table">
             <thead>
                 <tr>
+        
                     <th>Tên danh mục</th>
                     <th class="action-col">Chức năng</th>
                 </tr>
@@ -26,6 +27,7 @@
                     @foreach (var item in Model)
                     {
                         <tr>
+       
                             <td>@item.CategoryName</td>
                             <td class="actions">
                                 <a asp-action="Edit" asp-route-id="@item.CategoryID" class="btn-edit">Sửa</a>

@@ -49,6 +49,18 @@ namespace PPL3_Banhangonline.Database
                 .Property(p => p.Value)
                 .HasPrecision(18, 2);
         
+         modelBuilder.Entity<CartItem>()
+        .HasOne(ci => ci.Product)
+        .WithMany(p => p.CartItems) // Đảm bảo trong class Product có: public ICollection<CartItem> CartItems { get; set; }
+        .HasForeignKey(ci => ci.ProductID)
+        .OnDelete(DeleteBehavior.Restrict); // Đổi từ Cascade sang Restrict để tránh vòng lặp xóa
+
+
+         modelBuilder.Entity<OrderDetail>()
+        .HasOne(od => od.Product)
+        .WithMany(p => p.OrderDetails)
+        .HasForeignKey(od => od.ProductID)
+        .OnDelete(DeleteBehavior.Restrict);
         }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
