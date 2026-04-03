@@ -30,15 +30,15 @@ namespace PPL3_Banhangonline.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccountId"));
 
+                    b.Property<string>("AccountName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -55,6 +55,9 @@ namespace PPL3_Banhangonline.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CartID"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("CustomerID")
                         .HasColumnType("int");
 
@@ -63,7 +66,7 @@ namespace PPL3_Banhangonline.Migrations
                     b.HasIndex("CustomerID")
                         .IsUnique();
 
-                    b.ToTable("Cart");
+                    b.ToTable("Carts");
                 });
 
             modelBuilder.Entity("PPL3_Banhangonline.Models.CartItem", b =>
@@ -77,14 +80,13 @@ namespace PPL3_Banhangonline.Migrations
                     b.Property<int>("CartID")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("Price")
-                        .HasPrecision(18, 2)
+                    b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ProductID")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Quantity")
+                    b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.HasKey("CartItemID");
@@ -93,7 +95,7 @@ namespace PPL3_Banhangonline.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("CartItem");
+                    b.ToTable("CartItems");
                 });
 
             modelBuilder.Entity("PPL3_Banhangonline.Models.Category", b =>
@@ -123,9 +125,6 @@ namespace PPL3_Banhangonline.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CustomerID"));
 
-                    b.Property<int?>("AccountId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
@@ -146,9 +145,9 @@ namespace PPL3_Banhangonline.Migrations
 
                     b.HasKey("CustomerID");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("UserID");
 
-                    b.ToTable("Customer");
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("PPL3_Banhangonline.Models.Order", b =>
@@ -253,8 +252,7 @@ namespace PPL3_Banhangonline.Migrations
 
                     b.HasKey("PriceId");
 
-                    b.HasIndex("ProductID")
-                        .IsUnique();
+                    b.HasIndex("ProductID");
 
                     b.ToTable("Prices");
                 });
@@ -275,6 +273,9 @@ namespace PPL3_Banhangonline.Migrations
 
                     b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Price")
+                        .HasColumnType("int");
 
                     b.Property<string>("ProductName")
                         .HasColumnType("nvarchar(max)");
@@ -302,9 +303,6 @@ namespace PPL3_Banhangonline.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SellerID"));
 
-                    b.Property<int?>("AccountId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
@@ -325,9 +323,9 @@ namespace PPL3_Banhangonline.Migrations
 
                     b.HasKey("SellerID");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("UserID");
 
-                    b.ToTable("Seller");
+                    b.ToTable("Sellers");
                 });
 
             modelBuilder.Entity("PPL3_Banhangonline.Models.Shop", b =>
@@ -349,7 +347,7 @@ namespace PPL3_Banhangonline.Migrations
                     b.HasIndex("SellerID")
                         .IsUnique();
 
-                    b.ToTable("Shop");
+                    b.ToTable("Shops");
                 });
 
             modelBuilder.Entity("PPL3_Banhangonline.Models.Cart", b =>
@@ -374,7 +372,7 @@ namespace PPL3_Banhangonline.Migrations
                     b.HasOne("PPL3_Banhangonline.Models.Product", "Product")
                         .WithMany("CartItems")
                         .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Cart");
@@ -386,7 +384,9 @@ namespace PPL3_Banhangonline.Migrations
                 {
                     b.HasOne("PPL3_Banhangonline.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId");
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Account");
                 });
@@ -413,7 +413,7 @@ namespace PPL3_Banhangonline.Migrations
                     b.HasOne("PPL3_Banhangonline.Models.Product", "Product")
                         .WithMany("OrderDetails")
                         .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Order");
@@ -435,8 +435,8 @@ namespace PPL3_Banhangonline.Migrations
             modelBuilder.Entity("PPL3_Banhangonline.Models.Price", b =>
                 {
                     b.HasOne("PPL3_Banhangonline.Models.Product", "Product")
-                        .WithOne("Price")
-                        .HasForeignKey("PPL3_Banhangonline.Models.Price", "ProductID")
+                        .WithMany()
+                        .HasForeignKey("ProductID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -466,7 +466,9 @@ namespace PPL3_Banhangonline.Migrations
                 {
                     b.HasOne("PPL3_Banhangonline.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId");
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Account");
                 });
@@ -511,8 +513,6 @@ namespace PPL3_Banhangonline.Migrations
                     b.Navigation("CartItems");
 
                     b.Navigation("OrderDetails");
-
-                    b.Navigation("Price");
                 });
 
             modelBuilder.Entity("PPL3_Banhangonline.Models.Seller", b =>
