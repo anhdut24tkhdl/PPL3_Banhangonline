@@ -1,9 +1,7 @@
-﻿@{
-    ViewData["Title"] = "Trang quản trị";
-}
+﻿@model PPL3_Banhangonline.Models.Viewmodels.AdminDashboardViewModel
+
 @{
-    ViewData["Title"] = "Trang chủ";
-    var username = Context.Session.GetString("Username");
+    ViewData["Title"] = "Trang quản trị";
     var role = Context.Session.GetString("Role");
 }
 
@@ -15,8 +13,41 @@ else
 {
     <div class="container mt-5">
         <div class="admin-panel shadow-lg p-4 rounded">
-            <h2 class="text-center mb-4 text-primary fw-bold">Trang quản trị</h2>
-            <p class="text-center text-muted mb-4">Chọn chức năng bạn muốn quản lý</p>
+            <h2 class="text-center mb-2 text-primary fw-bold">Trang quản trị</h2>
+            <p class="text-center text-muted mb-4">Tổng quan nhanh cho người quản trị</p>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-4 col-6">
+                    <div class="stat-card">
+                        <span>Tài khoản</span>
+                        <strong>@Model.SoTaiKhoan</strong>
+                    </div>
+                </div>
+                <div class="col-md-4 col-6">
+                    <div class="stat-card">
+                        <span>Khách hàng</span>
+                        <strong>@Model.SoKhachHang</strong>
+                    </div>
+                </div>
+                <div class="col-md-4 col-6">
+                    <div class="stat-card">
+                        <span>Seller</span>
+                        <strong>@Model.SoSeller</strong>
+                    </div>
+                </div>
+                <div class="col-md-6 col-6">
+                    <div class="stat-card">
+                        <span>Danh mục</span>
+                        <strong>@Model.SoDanhMuc</strong>
+                    </div>
+                </div>
+                <div class="col-md-6 col-12">
+                    <div class="stat-card">
+                        <span>Sản phẩm</span>
+                        <strong>@Model.SoSanPham</strong>
+                    </div>
+                </div>
+            </div>
 
             <div class="row g-4">
                 <div class="col-md-6">
@@ -61,6 +92,28 @@ else
         background: white;
         max-width: 900px;
         margin: auto;
+        }
+
+        .stat-card {
+        background: linear-gradient(135deg, #f8fbff, #eef4ff);
+        border: 1px solid #d8e4ff;
+        border-radius: 18px;
+        padding: 18px;
+        text-align: center;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+
+        .stat-card span {
+        display: block;
+        color: #6b7280;
+        margin-bottom: 8px;
+        }
+
+        .stat-card strong {
+        display: block;
+        color: #1f4e79;
+        font-size: 1.5rem;
+        font-weight: 700;
         }
 
         .admin-card {
