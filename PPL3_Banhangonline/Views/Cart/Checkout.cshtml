@@ -1,42 +1,126 @@
 ﻿@model PPL3_Banhangonline.Models.Cart
-
 @{
-    ViewData["Title"] = "Thanh toán";
+    ViewData["Title"] = "Xác nhận thanh toán";
     decimal total = 0;
 }
 
-<h2>Thanh toán</h2>
+<style>
+    .checkout-wrap {
+        background: #f5f5f5;
+        padding: 30px 0;
+    }
 
-@if (Model == null || Model.CartItems == null || !Model.CartItems.Any())
-{
-    <p>Không có sản phẩm để thanh toán.</p>
-}
-else
-{
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Tên sản phẩm</th>
-                <th>Đơn giá</th>
-                <th>Số lượng</th>
-                <th>Thành tiền</th>
-            </tr>
-        </thead>
-        <tbody>
+    .checkout-card {
+        background: white;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    }
+
+    .address-header {
+        color: #ee4d2d;
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin-bottom: 15px;
+    }
+
+    .product-list-header {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        color: #888;
+        font-size: 0.9rem;
+    }
+
+    .order-summary {
+        border-top: 1px dashed #ddd;
+        margin-top: 20px;
+        padding-top: 20px;
+    }
+
+    .btn-place-order {
+        background: #ee4d2d;
+        color: white;
+        border: none;
+        padding: 12px 60px;
+        font-size: 1.1rem;
+        border-radius: 2px;
+    }
+
+        .btn-place-order:hover {
+            background: #d73211;
+            color: white;
+        }
+</style>
+
+<div class="checkout-wrap">
+    <div class="container">
+        <h3 class="mb-4">Thanh toán</h3>
+
+        <form asp-controller="Cart" asp-action="PlaceOrder" method="post">
             @foreach (var item in Model.CartItems)
             {
-                var lineTotal = item.Price * item.Quantity;
-                total += lineTotal;
-
-                <tr>
-                    <td>@item.Product?.ProductName</td>
-                    <td>@item.Price.ToString("N0") đ</td>
-                    <td>@item.Quantity</td>
-                    <td>@lineTotal.ToString("N0") đ</td>
-                </tr>
+                <input type="hidden" name="selectedCartItemIds" value="@item.CartItemID" />
             }
-        </tbody>
-    </table>
+            <div class="checkout-card">
+                <div class="address-header">
+                    <i class="bi bi-geo-alt"></i> Địa Chỉ Nhận Hàng
+                </div>
+                <div class="d-flex gap-3">
+                    <strong>@Model.Customer?.Name (@Model.Customer?.Phone)</strong>
+                    <span>@Model.Customer?.Address</span>
+                    <a href="#" class="text-primary ms-auto" style="text-decoration:none;">Thay đổi</a>
+                </div>
+            </div>
 
-    <h4>Tổng thanh toán: <span style="color:green;">@total.ToString("N0") đ</span></h4>
-}
+            <div class="checkout-card">
+                <div class="row product-list-header mb-3 text-center">
+                    <div class="col-6 text-start">Sản phẩm</div>
+                    <div class="col-2">Đơn giá</div>
+                    <div class="col-2">Số lượng</div>
+                    <div class="col-2">Thành tiền</div>
+                </div>
+
+                @foreach (var item in Model.CartItems)
+                {
+                    var lineTotal = item.Price * item.Quantity;
+                    total += lineTotal;
+                    <div class="row align-items-center text-center mb-3">
+                        <div class="col-6 text-start d-flex align-items-center gap-3">
+                            <img src="@item.Product?.Image" style="width:50px; height:50px; object-fit:cover;" />
+                            <span>@item.Product?.ProductName</span>
+                        </div>
+                        <div class="col-2 text-muted">₫@item.Price.ToString("N0")</div>
+                        <div class="col-2">@item.Quantity</div>
+                        <div class="col-2 fw-bold">₫@lineTotal.ToString("N0")</div>
+                    </div>
+                }
+            </div>
+
+            <div class="checkout-card d-flex justify-content-between align-items-center">
+                <span class="fw-bold">Phương thức thanh toán</span>
+                <span class="text-muted">Thanh toán khi nhận hàng (COD)</span>
+            </div>
+
+            <div class="checkout-card order-summary text-end">
+                <div class="d-flex justify-content-end gap-5 mb-2">
+                    <div class="text-muted">Tổng tiền hàng:</div>
+                    <div style="width: 120px;">₫@total.ToString("N0")</div>
+                </div>
+                <div class="d-flex justify-content-end gap-5 mb-2">
+                    <div class="text-muted">Phí vận chuyển:</div>
+                    <div style="width: 120px;">₫0</div>
+                </div>
+                <div class="d-flex justify-content-end gap-5 align-items-center mt-3">
+                    <div style="font-size: 1.1rem;">Tổng thanh toán:</div>
+                    <div style="width: 120px; color: #ee4d2d; font-size: 1.8rem; font-weight: bold;">
+                        ₫@total.ToString("N0")
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn-place-order shadow-sm">Đặt hàng</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

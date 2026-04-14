@@ -1,0 +1,98 @@
+﻿@model PPL3_Banhangonline.Models.Order
+@{
+    ViewData["Title"] = "Hóa đơn #" + Model.OrderID;
+}
+
+<div class="container my-5">
+    <div class="card shadow-sm border-0 p-5" id="invoice-print">
+        <div class="row mb-4">
+            <div class="col-sm-6">
+                <h2 class="text-success fw-bold">GREEN BASKET</h2>
+                <p class="text-muted">Nông sản sạch cho mọi nhà<br>Đà Nẵng, Việt Nam</p>
+            </div>
+            <div class="col-sm-6 text-end">
+                <h3 class="text-uppercase">Hóa Đơn</h3>
+                <p>Mã đơn hàng: <strong>#@Model.OrderID</strong><br>Ngày lập: @Model.OrderDate?.ToString("dd/MM/yyyy")</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="row mb-4">
+            <div class="col-sm-6">
+                <h6 class="text-muted">Khách hàng:</h6>
+                <h5>@Model.Customer?.Name</h5>
+                <p>SĐT: @Model.Customer?.Phone<br>Địa chỉ: @Model.Customer?.Address</p>
+            </div>
+            <div class="col-sm-6 text-end">
+                <h6 class="text-muted">Hình thức thanh toán:</h6>
+                <p>
+                    <strong>@Model.Payment?.Method</strong> (COD)<br>
+                    Trạng thái:
+                    <span class="badge @(Model.Payment?.Status == "Paid" ? "bg-success" : "bg-warning text-dark")">
+                        @(Model.Payment?.Status == "Paid" ? "Đã thanh toán" : "Chờ thu tiền")
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <table class="table table-striped border">
+            <thead class="bg-light">
+                <tr>
+                    <th>STT</th>
+                    <th>Sản phẩm</th>
+                    <th class="text-center">Số lượng</th>
+                    <th class="text-end">Đơn giá</th>
+                    <th class="text-end">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int i = 1;
+                }
+                @foreach (var item in Model.OrderDetails)
+                {
+                    <tr>
+                        <td>@(i++)</td>
+                        <td>@item.Product?.ProductName</td>
+                        <td class="text-center">@item.Quantity</td>
+                        <td class="text-end">@item.UnitPrice?.ToString("N0") đ</td>
+                        <td class="text-end">@((item.UnitPrice * item.Quantity)?.ToString("N0")) đ</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="row justify-content-end mt-4">
+            <div class="col-md-4 text-end">
+                <p class="d-flex justify-content-between"><span>Tạm tính:</span> <span>@Model.TotalAmount?.ToString("N0") đ</span></p>
+                <p class="d-flex justify-content-between"><span>Phí ship:</span> <span>0 đ</span></p>
+                <h4 class="d-flex justify-content-between border-top pt-2 fw-bold text-danger">
+                    <span>Tổng cộng:</span> <span>@Model.TotalAmount?.ToString("N0") đ</span>
+                </h4>
+            </div>
+        </div>
+
+        <div class="mt-5 pt-5 text-center small text-muted">
+            <p>Cảm ơn bạn đã tin dùng nông sản của GreenBasket!<br>Mọi thắc mắc xin liên hệ: 0123.456.789</p>
+        </div>
+    </div>
+
+    <div class="text-center mt-4 no-print">
+        <button onclick="window.print()" class="btn btn-outline-dark px-4"><i class="bi bi-printer"></i> In hóa đơn</button>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-success px-4 ms-2">Về trang chủ</a>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        .no-print {
+            display: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: none;
+        }
+    }
+</style>

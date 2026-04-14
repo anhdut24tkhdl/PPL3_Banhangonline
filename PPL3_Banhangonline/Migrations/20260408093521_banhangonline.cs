@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PPL3_Banhangonline.Migrations
 {
     /// <inheritdoc />
-    public partial class FinalFixCascade : Migration
+    public partial class banhangonline : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

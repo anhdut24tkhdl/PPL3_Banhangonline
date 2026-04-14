@@ -8,5 +8,5 @@
         public DateTime CreatedAt { get; set; }
 
         public Product Product { get; set; }
-    }
+    } 
 }

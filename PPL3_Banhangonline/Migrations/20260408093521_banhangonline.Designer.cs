@@ -12,8 +12,8 @@ using PPL3_Banhangonline.Database;
 namespace PPL3_Banhangonline.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260403041720_FinalFixCascade")]
-    partial class FinalFixCascade
+    [Migration("20260408093521_banhangonline")]
+    partial class banhangonline
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

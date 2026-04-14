@@ -72,6 +72,9 @@ namespace PPL3_Banhangonline.Database
         public DbSet<Cart> Carts { get; set; }
         
         public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<Payment> Payments { get; set; }
 
         public object Accounts { get; internal set; }
     }

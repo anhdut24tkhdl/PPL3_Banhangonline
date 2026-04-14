@@ -1,0 +1,117 @@
+﻿@model PPL3_Banhangonline.Models.Order
+@{
+    ViewData["Title"] = "Hóa đơn #" + Model.OrderID;
+}
+
+<div class="container my-5">
+    <div class="card shadow border-0 p-4 p-md-5" id="invoice-content" style="border-radius: 15px;">
+        <div class="row mb-4">
+            <div class="col-6">
+                <h2 class="text-success fw-bold">GREEN BASKET</h2>
+                <p class="text-muted small">Nông sản sạch từ tâm<br>Đà Nẵng, Việt Nam</p>
+            </div>
+            <div class="col-6 text-end">
+                <h3 class="text-uppercase fw-bold">Hóa Đơn</h3>
+                <p class="mb-0">Mã đơn: <strong>#@Model.OrderID</strong></p>
+                <p>Ngày đặt: @Model.OrderDate?.ToString("dd/MM/yyyy HH:mm")</p>
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="row mb-4">
+            <div class="col-sm-6">
+                <h6 class="text-muted text-uppercase small fw-bold">Người nhận:</h6>
+                <h5 class="fw-bold">@Model.Customer?.Name</h5>
+                <p class="text-muted mb-1">📞 @Model.Customer?.Phone</p>
+                <p class="text-muted">📍 @Model.Customer?.Address</p>
+            </div>
+            <div class="col-sm-6 text-md-end">
+                <h6 class="text-muted text-uppercase small fw-bold">Trạng thái:</h6>
+                <p class="mb-1">
+                    Thanh toán:
+                    <span class="badge @(Model.Payment?.Status == "Paid" ? "bg-success" : "bg-warning text-dark")">
+                        @(Model.Payment?.Status == "Paid" ? "Đã trả tiền" : "Chờ thu tiền (COD)")
+                    </span>
+                </p>
+                <p>Vận chuyển: <span class="badge bg-info text-dark">@Model.Status</span></p>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-borderless">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="py-3">Sản phẩm</th>
+                        <th class="py-3 text-center">Số lượng</th>
+                        <th class="py-3 text-end">Đơn giá</th>
+                        <th class="py-3 text-end">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.OrderDetails)
+                    {
+                        <tr class="border-bottom">
+                            <td class="py-3">
+                                <div class="d-flex align-items-center">
+                                    <img src="@item.Product?.Image" style="width: 40px; height: 40px; object-fit: cover;" class="rounded me-3" />
+                                    <span>@item.Product?.ProductName</span>
+                                </div>
+                            </td>
+                            <td class="py-3 text-center">x@item.Quantity</td>
+                            <td class="py-3 text-end">@item.UnitPrice?.ToString("N0")đ</td>
+                            <td class="py-3 text-end fw-bold">@((item.UnitPrice * item.Quantity)?.ToString("N0"))đ</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="row justify-content-end mt-4">
+            <div class="col-md-5 col-lg-4">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Tạm tính:</span>
+                    <span>@Model.TotalAmount?.ToString("N0")đ</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Phí giao hàng:</span>
+                    <span>0đ</span>
+                </div>
+                <div class="d-flex justify-content-between border-top pt-2 mt-2">
+                    <h5 class="fw-bold">Tổng cộng:</h5>
+                    <h5 class="fw-bold text-danger">@Model.TotalAmount?.ToString("N0")đ</h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5 pt-5 border-top">
+            <p class="text-muted italic small">Cảm ơn bạn đã đồng hành cùng nông sản sạch GreenBasket!</p>
+        </div>
+    </div>
+
+    <div class="mt-4 text-center no-print">
+        <button onclick="window.print()" class="btn btn-outline-dark px-4 shadow-sm">
+            <i class="bi bi-printer me-2"></i> In hóa đơn
+        </button>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-success px-4 ms-2 shadow-sm">
+            Tiếp tục mua sắm
+        </a>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        .no-print {
+            display: none !important;
+        }
+
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #eee !important;
+        }
+
+        body {
+            background: white !important;
+        }
+    }
+</style>

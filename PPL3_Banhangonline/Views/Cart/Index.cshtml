@@ -1,64 +1,239 @@
 ﻿@model PPL3_Banhangonline.ViewModels.CartViewModel
 
 @{
-    ViewData["Title"] = "Giỏ hàng";
+    ViewData["Title"] = "Giỏ hàng - GreenBasket";
 }
 
-<h2>Giỏ hàng</h2>
+<style>
+    .cart-page {
+        margin-top: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-@if (TempData["Message"] != null)
-{
-    <p style="color:red;">@TempData["Message"]</p>
-}
+    .cart-header {
+        display: flex;
+        background: #fff;
+        padding: 15px;
+        font-weight: bold;
+        border-radius: 8px 8px 0 0;
+        border-bottom: 1px solid #eee;
+        text-align: center;
+        color: #555;
+    }
 
-@if (Model.Items == null || !Model.Items.Any())
-{
-    <div style="padding:20px; border:1px solid #ddd; border-radius:10px; background:#fafafa;">
-        <p>Giỏ hàng không có sản phẩm.</p>
-    </div>
-}
-else
-{
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Ảnh</th>
-                <th>Tên sản phẩm</th>
-                <th>Đơn giá</th>
-                <th>Số lượng</th>
-                <th>Thành tiền</th>
-                <th>Xóa</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Items)
-            {
-                <tr>
-                    <td>
-                        <img src="@item.Image" width="80" />
-                    </td>
-                    <td>@item.ProductName</td>
-                    <td>@item.UnitPrice.ToString("N0") đ</td>
-                    <td>
-                        <form asp-action="UpdateQuantity" method="post" style="display:flex; gap:6px;">
-                            <input type="hidden" name="cartItemId" value="@item.CartItemID" />
-                            <input type="number" name="quantity" value="@item.Quantity" min="1" style="width:70px;" />
-                            <button type="submit" class="btn btn-warning btn-sm">Cập nhật</button>
-                        </form>
-                    </td>
-                    <td>@item.TotalPrice.ToString("N0") đ</td>
-                    <td>
-                        <a asp-action="Remove" asp-route-cartItemId="@item.CartItemID" class="btn btn-danger btn-sm">
-                            Xóa
-                        </a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    .cart-item {
+        display: flex;
+        align-items: center;
+        background: #fff;
+        padding: 15px;
+        margin-top: 10px;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: 0.3s;
+    }
 
-    <div style="text-align:right; margin-top:20px;">
-        <h4>Tổng tiền: <span style="color:green;">@Model.GrandTotal.ToString("N0") đ</span></h4>
-        <a asp-action="Checkout" class="btn btn-success">Thanh toán</a>
-    </div>
+        .cart-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+    .quantity-control {
+        display: flex;
+        justify-content: center;
+        border: 1px solid #ddd;
+        width: fit-content;
+        margin: auto;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .quantity-btn {
+        width: 30px;
+        height: 30px;
+        border: none;
+        background: #f8f9fa;
+        cursor: pointer;
+    }
+
+    .quantity-input {
+        width: 45px;
+        text-align: center;
+        border: none;
+        border-left: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+    }
+
+    .cart-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #fff;
+        padding: 20px;
+        margin-top: 30px;
+        border-radius: 8px;
+        position: sticky;
+        bottom: 10px;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        z-index: 100;
+    }
+
+    .btn-checkout {
+        background: #2e7d32;
+        color: white;
+        border: none;
+        padding: 12px 50px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+        .btn-checkout:hover {
+            background: #1b5e20;
+            transform: scale(1.05);
+        }
+
+    .product-info {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        gap: 15px;
+    }
+
+    .product-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+</style>
+
+<div class="cart-page">
+    <h2 style="color: #2e7d32; margin-bottom: 25px; font-weight: bold;">🛒 Giỏ hàng của bạn</h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-danger shadow-sm">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Message"]
+        </div>
+    }
+
+    @if (Model.Items == null || !Model.Items.Any())
+    {
+        <div style="text-align: center; padding: 100px; background: white; border-radius: 15px;">
+            <p class="mt-3 text-muted">Giỏ hàng của bạn đang trống!</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-success mt-2 px-4">Quay lại mua sắm ngay</a>
+        </div>
+    }
+    else
+    {
+        @* BAO BỌC TOÀN BỘ BẰNG FORM ĐỂ GỬI CÁC MỤC ĐÃ CHỌN *@
+        <form asp-action="Checkout" method="post">
+            <div class="cart-header shadow-sm d-none d-md-flex">
+                <div style="width: 5%;"><input type="checkbox" id="selectAll" class="form-check-input"></div>
+                <div style="width: 40%; text-align: left;">Sản phẩm</div>
+                <div style="width: 15%;">Đơn giá</div>
+                <div style="width: 15%;">Số lượng</div>
+                <div style="width: 15%;">Số tiền</div>
+                <div style="width: 10%;">Thao tác</div>
+            </div>
+
+            <div class="cart-items">
+                @foreach (var item in Model.Items)
+                {
+                    <div class="cart-item">
+                        <div style="width: 5%;">
+                            @* QUAN TRỌNG: name="selectedIds" để khớp với List<int> trong Controller *@
+                            <input type="checkbox" name="selectedIds" value="@item.CartItemID"
+                                   class="item-checkbox form-check-input"
+                                   data-price="@item.UnitPrice"
+                                   data-quantity="@item.Quantity">
+                        </div>
+
+                        <div style="width: 40%;" class="product-info">
+                            <img src="@item.Image" class="product-img shadow-sm" />
+                            <div>
+                                <div class="fw-bold">@item.ProductName</div>
+                                <small class="text-muted">Nông sản tươi sạch GreenBasket</small>
+                            </div>
+                        </div>
+
+                        <div style="width: 15%;" class="text-dark fw-bold">@item.UnitPrice.ToString("N0")₫</div>
+
+                        <div style="width: 15%;">
+                            <div class="quantity-control">
+                                <a asp-action="UpdateQuantity" asp-route-cartItemId="@item.CartItemID" asp-route-quantity="@(item.Quantity - 1)" class="btn btn-light btn-sm px-2">-</a>
+                                <input type="text" value="@item.Quantity" class="quantity-input" readonly />
+                                <a asp-action="UpdateQuantity" asp-route-cartItemId="@item.CartItemID" asp-route-quantity="@(item.Quantity + 1)" class="btn btn-light btn-sm px-2">+</a>
+                            </div>
+                        </div>
+
+                        <div style="width: 15%;" class="text-danger fw-bold">@((item.UnitPrice * item.Quantity).ToString("N0"))₫</div>
+
+                        <div style="width: 10%;">
+                            <a asp-action="Remove" asp-route-cartItemId="@item.CartItemID"
+                               class="btn btn-sm btn-outline-danger border-0"
+                               onclick="return confirm('Xóa sản phẩm này?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="cart-footer sticky-bottom shadow">
+                <div>
+                    <button type="submit"
+                            asp-action="RemoveSelected"
+                            class="btn btn-link text-danger p-0 text-decoration-none"
+                            onclick="return confirm('Bạn có chắc chắn muốn xóa các sản phẩm đã chọn?')">
+                        <i class="bi bi-trash"></i> Xóa sản phẩm đã chọn
+                    </button>
+                </div>
+                <div class="d-flex align-items-center" style="gap: 30px;">
+                    <div class="text-end">
+                        <div style="font-size: 14px; color: #555;">Tổng thanh toán:</div>
+                        <div id="total-amount" style="color: #ee4d2d; font-size: 28px; font-weight: bold;">0₫</div>
+                    </div>
+                    @* NÚT SUBMIT GỬI DỮ LIỆU ĐI *@
+                    <button type="submit" class="btn-checkout shadow">Mua hàng</button>
+                </div>
+            </div>
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+        const totalDisplay = document.getElementById('total-amount');
+        const selectAll = document.getElementById('selectAll');
+
+        // Hàm cập nhật tổng tiền hiển thị (Client-side)
+        function updateTotal() {
+            let total = 0;
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    const price = parseFloat(cb.getAttribute('data-price'));
+                    const qty = parseInt(cb.getAttribute('data-quantity'));
+                    total += price * qty;
+                }
+            });
+            totalDisplay.innerText = total.toLocaleString('vi-VN') + '₫';
+        }
+
+        // Lắng nghe sự kiện thay đổi trên từng checkbox
+        checkboxes.forEach(cb => cb.addEventListener('change', updateTotal));
+
+        // Logic "Chọn tất cả"
+        if(selectAll) {
+            selectAll.addEventListener('change', function() {
+                checkboxes.forEach(cb => {
+                    cb.checked = this.checked;
+                });
+                updateTotal();
+            });
+        }
+    </script>
 }
