@@ -34,8 +34,14 @@ namespace PPL3_Banhangonline.Controllers
                 ViewBag.Error = "Sai tài khoản hoặc mật khẩu";
                 return View(model);
             }
-           
-                
+
+            var customer = _context.Customers.FirstOrDefault(c => c.UserID == user.AccountId);
+            if (customer != null)
+            {
+                // Lưu CustomerID vào Session (Dùng Int32 cho đồng bộ)
+                HttpContext.Session.SetInt32("CustomerID", customer.CustomerID);
+            }
+
             HttpContext.Session.SetInt32("AccountId", user.AccountId);
             HttpContext.Session.SetString("Username", user.AccountName);
             HttpContext.Session.SetString("Role", user.Role.ToLower());

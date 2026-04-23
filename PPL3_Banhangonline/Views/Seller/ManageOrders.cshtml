@@ -1,4 +1,5 @@
-﻿@model IEnumerable<PPL3_Banhangonline.Models.Order>
+﻿@using PPL3_Banhangonline.Models.Viewmodels
+@model SellerManagementViewModel
 
 <div class="container mt-4">
     <nav aria-label="breadcrumb" class="mb-4">
@@ -14,47 +15,109 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3>Đơn hàng của Shop: @ViewBag.ShopName</h3>
-        <div class="btn-group">
-            <a asp-action="ManageOrders" asp-route-status="Processing" class="btn btn-outline-primary @(ViewBag.CurrentStatus == "Processing" ? "active" : "")">Chờ xác nhận</a>
-            <a asp-action="ManageOrders" asp-route-status="Shipping" class="btn btn-outline-warning @(ViewBag.CurrentStatus == "Shipping" ? "active" : "")">Đang giao</a>
-            <a asp-action="ManageOrders" asp-route-status="Delivered" class="btn btn-outline-success @(ViewBag.CurrentStatus == "Delivered" ? "active" : "")">Đã giao</a>
-        </div>
     </div>
 
-    <table class="table table-hover border">
-        <thead class="bg-light">
-            <tr>
-                <th>Khách hàng</th>
-                <th>Ngày đặt</th>
-                <th>Thanh toán</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var o in Model)
-            {
-                <tr>
-                    <td><strong>@o.Customer?.Name</strong><br /><small>@o.Customer?.Phone</small></td>
-                    <td>@o.OrderDate?.ToString("dd/MM/yyyy")</td>
-                    <td class="text-danger fw-bold">@o.TotalAmount?.ToString("N0")đ</td>
-                    <td>
-                        @if (o.Status == "Processing")
-                        {
-                            <form asp-action="UpdateOrderStatus" method="post">
-                                <input type="hidden" name="newStatus" value="Shipping" />
-                                <button type="submit" class="btn btn-sm btn-primary">Xác nhận đơn</button>
-                            </form>
-                        }
-                        else if (o.Status == "Shipping")
-                        {
-                            <form asp-action="UpdateOrderStatus" method="post">
-                                <input type="hidden" name="newStatus" value="Delivered" />
-                                <button type="submit" class="btn btn-sm btn-success">Giao thành công</button>
-                            </form>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <ul class="nav nav-pills mb-4 bg-white p-2 rounded shadow-sm border" id="sellerOrderTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold" id="regular-tab" data-bs-toggle="pill" data-bs-target="#regular" type="button" role="tab">
+                🛒 Đơn hàng thông thường (@Model.RegularOrders.Count)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold text-danger" id="rescue-tab" data-bs-toggle="pill" data-bs-target="#rescue" type="button" role="tab">
+                🆘 Đăng ký giải cứu (@Model.RescueOrders.Count)
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="sellerOrderTabContent">
+        <div class="tab-pane fade show active" id="regular" role="tabpanel">
+            <div class="mb-3 d-flex justify-content-end">
+                <div class="btn-group shadow-sm">
+                    <a asp-action="ManageOrders" asp-route-status="Processing" class="btn btn-outline-primary btn-sm @(ViewBag.CurrentStatus == "Processing" ? "active" : "")">Chờ xác nhận</a>
+                    <a asp-action="ManageOrders" asp-route-status="Shipping" class="btn btn-outline-warning btn-sm @(ViewBag.CurrentStatus == "Shipping" ? "active" : "")">Đang giao</a>
+                    <a asp-action="ManageOrders" asp-route-status="Delivered" class="btn btn-outline-success btn-sm @(ViewBag.CurrentStatus == "Delivered" ? "active" : "")">Đã giao</a>
+                </div>
+            </div>
+
+            <table class="table table-hover border bg-white shadow-sm">
+                <thead class="bg-light">
+                    <tr>
+                        <th>Khách hàng</th>
+                        <th>Ngày đặt</th>
+                        <th>Thanh toán</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var o in Model.RegularOrders)
+                    {
+                        <tr>
+                            <td><strong>@o.Customer?.Name</strong><br /><small>@o.Customer?.Phone</small></td>
+                            <td>@o.OrderDate?.ToString("dd/MM/yyyy")</td>
+                            <td class="text-danger fw-bold">@o.TotalAmount?.ToString("N0")đ</td>
+                            <td>
+                                @if (o.Status == "Processing")
+                                {
+                                    <form asp-action="UpdateOrderStatus" method="post">
+                                        <input type="hidden" name="orderId" value="@o.OrderID" />
+                                        <input type="hidden" name="newStatus" value="Shipping" />
+                                        <button type="submit" class="btn btn-sm btn-primary">Xác nhận đơn</button>
+                                    </form>
+                                }
+                                else if (o.Status == "Shipping")
+                                {
+                                    <form asp-action="UpdateOrderStatus" method="post">
+                                        <input type="hidden" name="orderId" value="@o.OrderID" />
+                                        <input type="hidden" name="newStatus" value="Delivered" />
+                                        <button type="submit" class="btn btn-sm btn-success">Giao thành công</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="tab-pane fade" id="rescue" role="tabpanel">
+            <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center">
+                <i class="bi bi-info-circle-fill me-2 fs-4"></i>
+                <div>Danh sách này bao gồm các khách hàng đã đăng ký mua nông sản trong các chiến dịch giải cứu của bạn.</div>
+            </div>
+
+            <table class="table table-hover border bg-white shadow-sm">
+                <thead class="table-danger text-white">
+                    <tr>
+                        <th>Người đăng ký</th>
+                        <th>Sản phẩm giải cứu</th>
+                        <th>Số lượng</th>
+                        <th>Ngày đăng ký</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var reg in Model.RescueOrders)
+                    {
+                        <tr>
+                            <td><strong>@reg.Customer?.Name</strong><br /><small>@reg.Customer?.Phone</small></td>
+                            <td><span class="text-success fw-bold">@reg.Campaign?.ProductName</span></td>
+                            <td><span class="badge bg-dark">@reg.Quantity kg</span></td>
+                            <td>@reg.RegistrationDate.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @if (reg.Status == "Pending")
+                                {
+                                    <span class="badge bg-warning text-dark">Chờ gom đơn</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">@reg.Status</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

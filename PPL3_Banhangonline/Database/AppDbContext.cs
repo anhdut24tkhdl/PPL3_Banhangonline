@@ -14,6 +14,25 @@ namespace PPL3_Banhangonline.Database
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Order>().ToTable("Orders");
+            modelBuilder.Entity<OrderDetail>().ToTable("OrderDetails");
+            modelBuilder.Entity<Payment>().ToTable("Payments");
+            modelBuilder.Entity<Product>().ToTable("Products");
+            modelBuilder.Entity<Category>().ToTable("Categories");
+            modelBuilder.Entity<Account>().ToTable("Account");
+
+            // AppDbContext.cs
+            modelBuilder.Entity<RescueRegistration>()
+                .HasOne(r => r.Campaign)
+                .WithMany(c => c.Registrations)
+                .HasForeignKey(r => r.CampaignID)
+                .OnDelete(DeleteBehavior.NoAction); // Bắt buộc là NoAction
+
+            modelBuilder.Entity<RescueRegistration>()
+                .HasOne(r => r.Customer)
+                .WithMany()
+                .HasForeignKey(r => r.CustomerID)
+                .OnDelete(DeleteBehavior.NoAction); // Bắt buộc là NoAction
             modelBuilder.Entity<OrderDetail>()
                 .HasKey(od => new { od.OrderID, od.ProductID });
 
@@ -61,7 +80,16 @@ namespace PPL3_Banhangonline.Database
         .WithMany(p => p.OrderDetails)
         .HasForeignKey(od => od.ProductID)
         .OnDelete(DeleteBehavior.Restrict);
+
+            // Thêm vào trong method OnModelCreating
+         modelBuilder.Entity<RescueCampaign>()
+        .Property(r => r.Price)
+        .HasPrecision(18, 2);
         }
+
+        
+
+        
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Price> Prices { get; set; }
@@ -75,7 +103,8 @@ namespace PPL3_Banhangonline.Database
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Payment> Payments { get; set; }
-
+        public DbSet<RescueCampaign> RescueCampaigns { get; set; }
+        public DbSet<RescueRegistration> RescueRegistrations { get; set; }
         public object Accounts { get; internal set; }
     }
 }

@@ -10,7 +10,48 @@
     <link rel="stylesheet" href="~/PPL3_Banhangonline.styles.css" asp-append-version="true" />
 </head>
 <body>
+    @{
+        // Lấy tên Controller để kiểm tra xem có phải đang ở trang Seller không
+        var controllerName = ViewContext.RouteData.Values["controller"]?.ToString();
+    }
     <header>
+        @if (controllerName == "Seller")
+        {
+            <div class="seller-header bg-white border-bottom shadow-sm py-3 mb-4">
+                <div class="container d-flex justify-content-between align-items-center">
+
+                    @* Cụm Logo dẫn về Home (Giữ nguyên style bạn thích) *@
+                    <a asp-controller="Home" asp-action="Index" class="logo-link d-inline-flex align-items-center" style="text-decoration: none !important;">
+                        <div class="logo-g-box d-flex align-items-center justify-content-center"
+                             style="background-color: #5cb85c; color: white; width: 52px; height: 52px; border-radius: 14px; font-size: 1.8rem; font-weight: bold; box-shadow: 0 6px 18px rgba(92, 184, 92, 0.25);">
+                            G
+                        </div>
+                        <div class="logo-info ms-3 d-none d-sm-block">
+                            <h2 class="m-0" style="color: #2e7d32 !important; font-size: 1.6rem; font-weight: 700; line-height: 1;">GreenBasket</h2>
+                            <span style="color: #757575 !important; font-size: 0.85rem; font-weight: bold; display: block;">Kênh Người Bán</span>
+                        </div>
+                    </a>
+
+                    @* Cụm Thông tin cửa hàng + Nút Giải Cứu *@
+                    <div class="d-flex align-items-center gap-3">
+
+                        <div class="shop-info d-none d-lg-block border-end pe-3 text-end">
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Cửa hàng</small>
+                            <strong class="text-success">@Context.Session.GetString("UserName")</strong>
+                        </div>
+
+                        <a asp-controller="Rescue" asp-action="CreateCampaign"
+                           class="btn btn-danger btn-sm rounded-pill px-3 fw-bold shadow-sm pulse-button">
+                            <i class="bi bi-heart-pulse-fill me-1"></i> ĐĂNG TIN GIẢI CỨU
+                        </a>
+
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-pill">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"

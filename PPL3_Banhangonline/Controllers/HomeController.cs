@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using PPL3_Banhangonline.Models;
 using PPL3_Banhangonline.Database;
@@ -18,8 +18,20 @@ namespace PPL3_Banhangonline.Controllers
 
         public IActionResult Index()
         {
-            var data = _context.Categories.ToList();
-            return View(data);
+            // 1. Lấy danh sách danh mục (Code cũ của bạn)
+            var categories = _context.Categories.ToList();
+
+            // 2. Lấy danh sách chiến dịch giải cứu đang hoạt động (Active)
+            // .ToList() để thực thi truy vấn
+            var rescueItems = _context.RescueCampaigns
+                                      .Where(c => c.Status == "Active")
+                                      .OrderByDescending(c => c.CreatedAt) // Hiện cái mới nhất lên đầu
+                                      .ToList();
+
+            // 3. Đưa vào ViewBag để truyền sang View
+            ViewBag.RescueItems = rescueItems;
+
+            return View(categories); // Vẫn trả về categories làm Model chính
         }
         public IActionResult Privacy()
         {

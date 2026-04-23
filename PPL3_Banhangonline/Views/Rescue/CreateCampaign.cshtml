@@ -1,0 +1,109 @@
+﻿@model PPL3_Banhangonline.Models.RescueCampaign
+
+@{
+    ViewData["Title"] = "Đăng ký giải cứu nông sản";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow border-0 rounded-4">
+                @* Header với màu đỏ đặc trưng của chiến dịch giải cứu *@
+                <div class="card-header bg-danger text-white py-3 rounded-top-4">
+                    <h4 class="mb-0 text-center fw-bold">
+                        <i class="bi bi-megaphone-fill me-2"></i> ĐĂNG KÝ CHIẾN DỊCH GIẢI CỨU
+                    </h4>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <p class="text-muted text-center mb-4">
+                        Tính năng này dành cho nông sản sắp đến kỳ thu hoạch nhưng gặp khó khăn về đầu ra.
+                    </p>
+
+                    <form asp-action="CreateCampaign" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                        @* 1. Tên sản phẩm *@
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tên nông sản cần giải cứu</label>
+                            <input asp-for="ProductName" class="form-control form-control-lg border-success-subtle"
+                                   placeholder="Ví dụ: Dưa hấu Quảng Nam, Hành tím Vĩnh Châu..." required />
+                            <span asp-validation-for="ProductName" class="text-danger small"></span>
+                        </div>
+
+                        @* 2. Phân loại *@
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Loại sản phẩm</label>
+                            <select asp-for="CategoryID" class="form-select border-success-subtle" required>
+                                <option value="">-- Chọn loại nông sản --</option>
+                                @if (ViewBag.Categories != null)
+                                {
+                                    foreach (var cat in ViewBag.Categories as List<Category>)
+                                    {
+                                        <option value="@cat.CategoryID">@cat.CategoryName</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        @* 3. Lý do giải cứu (Quan trọng nhất) *@
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Lý do cần giải cứu</label>
+                            <textarea asp-for="Reason" class="form-control border-danger-subtle" rows="2"
+                                      placeholder="Ví dụ: Thương lái bỏ cọc, ảnh hưởng bão lũ, rớt giá mạnh..."></textarea>
+                            <span asp-validation-for="Reason" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row">
+                            @* 4. Giá giải cứu *@
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Giá hỗ trợ (VNĐ/Kg)</label>
+                                <div class="input-group">
+                                    <input asp-for="Price" type="number" class="form-control border-success-subtle" placeholder="0" required />
+                                    <span class="input-group-text">đ</span>
+                                </div>
+                            </div>
+
+                            @* 5. Số lượng mua tối thiểu (Theo yêu cầu của Cảm) *@
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Mua tối thiểu (Kg/Thùng)</label>
+                                <input asp-for="MinQuantity" type="number" class="form-control border-success-subtle" value="5" min="1" required />
+                                <div class="form-text small">Khách phải đăng ký ít nhất số lượng này.</div>
+                            </div>
+                        </div>
+
+                        @* 6. Ngày thu hoạch dự kiến *@
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ngày dự kiến bắt đầu thu hoạch</label>
+                            <input asp-for="ExpectedHarvestDate" type="date" class="form-control border-success-subtle" required />
+                            <div class="form-text small">Để khách hàng biết thời gian chờ đợi.</div>
+                        </div>
+
+                        @* 7. Mô tả thêm *@
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Thông tin chi tiết (Mô tả)</label>
+                            <textarea asp-for="Description" class="form-control border-success-subtle" rows="4"
+                                      placeholder="Mô tả về quy trình trồng, chất lượng sản phẩm..."></textarea>
+                        </div>
+
+                        @* Nút hành động *@
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg fw-bold shadow-sm">
+                                <i class="bi bi-check-circle-fill me-2"></i> XÁC NHẬN ĐĂNG TIN
+                            </button>
+                            <a asp-controller="Seller" asp-action="Index" class="btn btn-link text-muted text-decoration-none">
+                                Quay lại Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -61,13 +61,28 @@ namespace PPL3_Banhangonline.Controllers
                 return Content("Không tìm thấy cửa hàng của seller.");
             }
 
+            int myShopId = seller.Shop.ShopID;
+
+            // 1. Lấy sản phẩm thường
             var products = _context.Products
-                .Where(p => p.ShopID == seller.Shop.ShopID)
+                .Include(p => p.Category)
+                .Where(p => p.ShopID == myShopId)
                 .ToList();
 
-            ViewBag.ShopName = seller.Shop.ShopName;
+            // 2. Lấy sản phẩm đang giải cứu
+            var rescueCampaigns = _context.RescueCampaigns
+                .Include(rc => rc.Category)
+                .Where(rc => rc.ShopID == myShopId)
+                .ToList();
 
-            return View(products);
+            var model = new SellerProductManagementViewModel
+            {
+                RegularProducts = products,
+                RescueCampaigns = rescueCampaigns
+            };
+
+            ViewBag.ShopName = seller.Shop.ShopName;
+            return View(model);
         }
 
         [HttpGet]
@@ -150,7 +165,6 @@ namespace PPL3_Banhangonline.Controllers
             TempData["Success"] = "Đăng ký seller thành công!";
             return RedirectToAction("Index", "Seller");
         }
-
         public IActionResult ManageOrders(string status = "Processing")
         {
             var accountId = HttpContext.Session.GetInt32("AccountId");
@@ -158,19 +172,36 @@ namespace PPL3_Banhangonline.Controllers
 
             if (seller?.Shop == null) return RedirectToAction("Index");
 
-            // Lấy các đơn hàng có chứa sản phẩm thuộc Shop của Seller này
-            var orders = _context.OrderDetails
-                .Include(od => od.Order)
-                .ThenInclude(o => o.Customer)
+            int myShopId = seller.Shop.ShopID;
+
+            // 1. Lấy đơn hàng thường (Giữ nguyên logic lọc theo status của bạn)
+            var regularOrders = _context.OrderDetails
+                .Include(od => od.Order).ThenInclude(o => o.Customer)
                 .Include(od => od.Product)
-                .Where(od => od.Product.ShopID == seller.Shop.ShopID && od.Order.Status == status)
+                .Where(od => od.Product.ShopID == myShopId && od.Order.Status == status)
                 .Select(od => od.Order)
                 .Distinct()
                 .ToList();
 
+            // 2. Lấy đơn đăng ký giải cứu (Của các chiến dịch thuộc Shop này)
+            var rescueOrders = _context.RescueRegistrations
+                .Include(r => r.Campaign)
+                .Include(r => r.Customer)
+                .Where(r => r.Campaign.ShopID == myShopId)
+                .OrderByDescending(r => r.RegistrationDate)
+                .ToList();
+
+            // 3. Đưa vào ViewModel gộp
+            var model = new SellerManagementViewModel
+            {
+                RegularOrders = regularOrders,
+                RescueOrders = rescueOrders
+            };
+
             ViewBag.CurrentStatus = status;
             ViewBag.ShopName = seller.Shop.ShopName;
-            return View(orders);
+
+            return View(model);
         }
 
         [HttpPost]
@@ -212,7 +243,7 @@ namespace PPL3_Banhangonline.Controllers
             ViewBag.Categories = _context.Categories.ToList();
             return View();
         }
-        // ================= CHỈNH SỬA SẢN PHẨM =================
+
         [HttpGet]
         public IActionResult EditProduct(int id)
         {
@@ -260,7 +291,7 @@ namespace PPL3_Banhangonline.Controllers
 
             return RedirectToAction("ManageProducts");
         }
-        
+
         public IActionResult RevenueStatistics()
         {
             var accountId = HttpContext.Session.GetInt32("AccountId");

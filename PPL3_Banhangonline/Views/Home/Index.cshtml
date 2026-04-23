@@ -6,7 +6,10 @@
     var username = Context.Session.GetString("Username");
     var role = Context.Session.GetString("Role");
 }
-
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
 <link rel="stylesheet" href="~/css/style.css" />
 
 <div class="home-page">
@@ -122,6 +125,40 @@
                     <p>Hiện chưa có danh mục nào.</p>
                 }
             </div>
+            @if (ViewBag.RescueItems != null)
+            {
+                var rescueList = (List<RescueCampaign>)ViewBag.RescueItems;
+                if (rescueList.Any())
+                {
+                    <div class="rescue-section py-4">
+                        <h2 class="text-danger fw-bold mb-4">📢 CHIẾN DỊCH GIẢI CỨU NÔNG SẢN</h2>
+                        <div class="row">
+                            @foreach (var item in rescueList)
+                            {
+                                <div class="col-md-3 mb-4">
+                                    <div class="card h-100 border-danger shadow-sm">
+                                        <div class="card-header bg-danger text-white fw-bold text-center">
+                                            CẦN GIẢI CỨU
+                                        </div>
+                                        <div class="card-body">
+                                            <h5 class="card-title text-success fw-bold">@item.ProductName</h5>
+                                            <p class="card-text small text-muted">Lý do: @item.Reason</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="text-danger fw-bold">@item.Price.ToString("N0")đ</span>
+                                                <span class="badge bg-light text-dark border">Min: @item.MinQuantity</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-transparent border-0">
+                                            <a href="@Url.Action("Register", "Rescue", new { id = item.CampaignID })"
+                                               class="btn btn-danger w-100 fw-bold">CHUNG TAY GIÚP ĐỠ</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
         </section>
 
         <section class="rescue-section" id="rescue-section">
