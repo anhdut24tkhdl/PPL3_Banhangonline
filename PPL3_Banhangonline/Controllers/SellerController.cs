@@ -42,6 +42,71 @@ namespace PPL3_Banhangonline.Controllers
             return View(seller.Shop);
         }
 
+        [HttpGet]
+        public IActionResult EditProfile()
+        {
+            var accountId = HttpContext.Session.GetInt32("AccountId");
+            var role = HttpContext.Session.GetString("Role");
+
+            if (accountId == null || role?.ToLower() != "seller")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var seller = _context.Sellers.FirstOrDefault(s => s.UserID == accountId);
+            if (seller == null)
+            {
+                TempData["Error"] = "Không tìm thấy thông tin người bán.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var model = new SellerProfileViewModel
+            {
+                Name = seller.Name,
+                Phone = seller.Phone,
+                Email = seller.Email,
+                Address = seller.Address,
+                Age = seller.Age
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditProfile(SellerProfileViewModel model)
+        {
+            var accountId = HttpContext.Session.GetInt32("AccountId");
+            var role = HttpContext.Session.GetString("Role");
+
+            if (accountId == null || role?.ToLower() != "seller")
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var seller = _context.Sellers.FirstOrDefault(s => s.UserID == accountId);
+            if (seller == null)
+            {
+                TempData["Error"] = "Không tìm thấy thông tin người bán.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            seller.Name = model.Name;
+            seller.Phone = model.Phone;
+            seller.Email = model.Email;
+            seller.Address = model.Address;
+            seller.Age = model.Age;
+            _context.SaveChanges();
+
+            TempData["Success"] = "Cập nhật thông tin thành công.";
+            return RedirectToAction(nameof(EditProfile));
+        }
+
         public IActionResult ManageProducts()
         {
             var accountId = HttpContext.Session.GetInt32("AccountId");

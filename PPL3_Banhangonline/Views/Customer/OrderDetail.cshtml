@@ -1,0 +1,76 @@
+@model PPL3_Banhangonline.Models.Order
+@{
+    ViewData["Title"] = "Chi tiet don #" + Model.OrderID;
+
+    string HienThiTrangThai(string? status)
+    {
+        return status switch
+        {
+            "Pending" => "Chờ xử lý",
+            "Processing" => "Đang xử lý",
+            "Shipping" => "Đang giao",
+            "Delivered" => "Đã giao",
+            "Cancelled" => "Đã hủy",
+            "Paid" => "Đã thanh toán",
+            "Approved" => "Đã duyệt",
+            "Open" => "Đang mở",
+            _ => status ?? "Chưa cập nhật"
+        };
+    }
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold text-success mb-0">Chi tiet don #@Model.OrderID</h2>
+        <a asp-action="Orders" class="btn btn-outline-secondary">Quay lai</a>
+    </div>
+
+    <div class="card shadow-sm border-0 p-3 mb-4">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div><strong>Ngay dat:</strong> @Model.OrderDate?.ToString("dd/MM/yyyy HH:mm")</div>
+            </div>
+            <div class="col-md-4">
+                <div><strong>Trạng thái:</strong> @HienThiTrangThai(Model.Status)</div>
+            </div>
+            <div class="col-md-4">
+                <div><strong>Thanh toán:</strong> @HienThiTrangThai(Model.Payment?.Status)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light fw-bold">San pham trong don</div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th>San pham</th>
+                            <th class="text-center">So luong</th>
+                            <th class="text-end">Don gia</th>
+                            <th class="text-end">Thanh tien</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.OrderDetails)
+                        {
+                            <tr>
+                                <td>@item.Product?.ProductName</td>
+                                <td class="text-center">@item.Quantity</td>
+                                <td class="text-end">@item.UnitPrice?.ToString("N0") đ</td>
+                                <td class="text-end fw-semibold">@((item.UnitPrice * item.Quantity)?.ToString("N0")) đ</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="3" class="text-end">Tong cong</th>
+                            <th class="text-end text-danger">@Model.TotalAmount?.ToString("N0") đ</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

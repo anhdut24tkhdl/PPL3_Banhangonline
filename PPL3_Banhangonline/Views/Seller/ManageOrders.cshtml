@@ -1,6 +1,24 @@
 ﻿@using PPL3_Banhangonline.Models.Viewmodels
 @model SellerManagementViewModel
 
+@{
+    string HienThiTrangThai(string? status)
+    {
+        return status switch
+        {
+            "Pending" => "Chờ xử lý",
+            "Processing" => "Đang xử lý",
+            "Shipping" => "Đang giao",
+            "Delivered" => "Đã giao",
+            "Cancelled" => "Đã hủy",
+            "Paid" => "Đã thanh toán",
+            "Approved" => "Đã duyệt",
+            "Open" => "Đang mở",
+            _ => status ?? "Chưa cập nhật"
+        };
+    }
+}
+
 <div class="container mt-4">
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb bg-light p-3 rounded shadow-sm">
@@ -111,7 +129,7 @@
                                 }
                                 else
                                 {
-                                    <span class="badge bg-success">@reg.Status</span>
+                                    <span class="badge bg-success">@HienThiTrangThai(reg.Status)</span>
                                 }
                             </td>
                         </tr>

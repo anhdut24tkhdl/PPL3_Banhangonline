@@ -43,7 +43,16 @@
                             <span>|</span>
                             <a asp-controller="Cart" asp-action="Index">Giỏ hàng</a>
                             <span>|</span>
+                            <a asp-controller="Customer" asp-action="Orders">Đơn đã mua</a>
+                            <span>|</span>
+                            <a asp-controller="Customer" asp-action="EditProfile">Thông tin cá nhân</a>
+                            <span>|</span>
                             <a asp-controller="Seller" asp-action="RegisterSeller">Đăng ký Seller</a>
+                        }
+                        @if (role == "seller")
+                        {
+                            <span>|</span>
+                            <a asp-controller="Seller" asp-action="EditProfile">Thông tin cá nhân</a>
                         }
 
                         <span>|</span>

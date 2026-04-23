@@ -1,0 +1,122 @@
+@model PPL3_Banhangonline.Models.Viewmodels.CustomerOrdersViewModel
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+
+    string HienThiTrangThai(string? status)
+    {
+        return status switch
+        {
+            "Pending" => "Chờ xử lý",
+            "Processing" => "Đang xử lý",
+            "Shipping" => "Đang giao",
+            "Delivered" => "Đã giao",
+            "Cancelled" => "Đã hủy",
+            "Paid" => "Đã thanh toán",
+            "Approved" => "Đã duyệt",
+            "Open" => "Đang mở",
+            _ => status ?? "Chưa cập nhật"
+        };
+    }
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold text-success mb-0">Đơn hàng đã mua</h2>
+        <a asp-controller="Customer" asp-action="EditProfile" class="btn btn-outline-primary">Sửa thông tin cá nhân</a>
+    </div>
+
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-sm-4">
+            <select class="form-select" name="status">
+                <option value="">Tất cả trạng thái</option>
+                <option value="Processing" selected="@(Model.CurrentStatus == "Processing")">Đang xử lý</option>
+                <option value="Shipping" selected="@(Model.CurrentStatus == "Shipping")">Đang giao</option>
+                <option value="Delivered" selected="@(Model.CurrentStatus == "Delivered")">Đã giao</option>
+                <option value="Cancelled" selected="@(Model.CurrentStatus == "Cancelled")">Đã hủy</option>
+            </select>
+        </div>
+        <div class="col-sm-2">
+            <button type="submit" class="btn btn-success w-100">Lọc</button>
+        </div>
+    </form>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-light fw-bold">Đơn hàng thường</div>
+        <div class="card-body p-0">
+            @if (Model.RegularOrders.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Ngày đặt</th>
+                                <th>Tổng tiền</th>
+                                <th>Thanh toán</th>
+                                <th>Vận chuyển</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model.RegularOrders)
+                            {
+                                <tr>
+                                    <td>#@order.OrderID</td>
+                                    <td>@order.OrderDate?.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="fw-semibold">@order.TotalAmount?.ToString("N0") đ</td>
+                                    <td>@HienThiTrangThai(order.Payment?.Status)</td>
+                                    <td>@HienThiTrangThai(order.Status)</td>
+                                    <td class="text-end">
+                                        <a asp-action="OrderDetail" asp-route-id="@order.OrderID" class="btn btn-sm btn-outline-success">Xem chi tiết</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="p-3 text-muted">Bạn chưa có đơn hàng thường nào.</div>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light fw-bold">Đăng ký giải cứu</div>
+        <div class="card-body p-0">
+            @if (Model.RescueRegistrations.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th>Mã ĐK</th>
+                                <th>Sản phẩm</th>
+                                <th>Số lượng</th>
+                                <th>Ngày đăng ký</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var reg in Model.RescueRegistrations)
+                            {
+                                <tr>
+                                    <td>#@reg.RegistrationID</td>
+                                    <td>@(reg.Campaign?.ProductName ?? "Không rõ")</td>
+                                    <td>@reg.Quantity</td>
+                                    <td>@reg.RegistrationDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@HienThiTrangThai(reg.Status)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="p-3 text-muted">Bạn chưa có đăng ký giải cứu nào.</div>
+            }
+        </div>
+    </div>
+</div>
