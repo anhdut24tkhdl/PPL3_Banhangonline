@@ -74,9 +74,16 @@
 
                         @* 6. Ngày thu hoạch dự kiến *@
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Ngày dự kiến bắt đầu thu hoạch</label>
-                            <input asp-for="ExpectedHarvestDate" type="date" class="form-control border-success-subtle" required />
-                            <div class="form-text small">Để khách hàng biết thời gian chờ đợi.</div>
+                            <label class="form-label fw-bold text-danger">
+                                <i class="bi bi-clock-history"></i> Thời hạn kết thúc giải cứu (Ngày và Giờ)
+                            </label>
+                            <input asp-for="ExpectedHarvestDate" type="datetime-local"
+                                   class="form-control border-danger-subtle shadow-sm"
+                                   id="expiryDate" required />
+                            <div class="form-text small text-muted">
+                                Sau thời điểm này, hệ thống sẽ tự động đóng form đăng ký.
+                            </div>
+                            <span asp-validation-for="ExpectedHarvestDate" class="text-danger small"></span>
                         </div>
 
                         @* 7. Mô tả thêm *@
@@ -103,6 +110,12 @@
 </div>
 
 @section Scripts {
+    <script>
+        // Ngăn Seller chọn thời gian trong quá khứ
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('expiryDate').min = now.toISOString().slice(0,16);
+    </script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }

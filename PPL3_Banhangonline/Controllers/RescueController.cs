@@ -75,6 +75,15 @@ public class RescueController : Controller
     // 1. Trang hiện Form đăng ký
     public async Task<IActionResult> Register(int id)
     {
+        var role = HttpContext.Session.GetString("Role");
+
+        if (role != null && role.ToLower() == "seller")
+        {
+            // Gửi thông báo lỗi và quay về trang chủ
+            TempData["Error"] = "Tài khoản người bán không thể thực hiện chức năng đăng ký giải cứu. Vui lòng sử dụng tài khoản khách hàng.";
+            return RedirectToAction("Index", "Home");
+        }  
+
         var campaign = await _context.RescueCampaigns
             .Include(c => c.Shop)
             .FirstOrDefaultAsync(m => m.CampaignID == id);
@@ -88,33 +97,40 @@ public class RescueController : Controller
     [HttpPost]
     public async Task<IActionResult> ConfirmRegister(int campaignId, int quantity)
     {
+        // 1. Kiểm tra Role và Login (Giữ nguyên của Cảm)
         var role = HttpContext.Session.GetString("Role");
-
-        // Nếu là Seller thì "cấm cửa" ngay
         if (role != null && role.ToLower() == "seller")
         {
-            TempData["Error"] = "Tài khoản Seller không có quyền tham gia đăng ký giải cứu!";
+            TempData["Error"] = "Người bán không thể tham gia giải cứu!";
             return RedirectToAction("Index", "Home");
         }
-        var customerId = HttpContext.Session.GetInt32("CustomerID");
 
-        if (customerId == null)
+        var customerId = HttpContext.Session.GetInt32("CustomerID");
+        if (customerId == null) return RedirectToAction("Login", "Account");
+
+        // 2. Kiểm tra Thời gian và Tính hợp lệ
+        var campaign = await _context.RescueCampaigns.FindAsync(campaignId);
+
+        if (campaign == null) return NotFound();
+
+        // KIỂM TRA HẾT HẠN (QUAN TRỌNG)
+        if (campaign.ExpectedHarvestDate.HasValue && campaign.ExpectedHarvestDate.Value <= DateTime.Now)
         {
-            // Nếu không thấy CustomerID trong Session, bắt đi đăng nhập
-            return RedirectToAction("Login", "Account");
+            TempData["Error"] = "Rất tiếc! Chiến dịch này đã kết thúc thời gian đăng ký.";
+            return RedirectToAction("Index", "Home");
         }
 
-        var campaign = await _context.RescueCampaigns.FindAsync(campaignId);
-        if (campaign == null || quantity < campaign.MinQuantity)
+        if (quantity < campaign.MinQuantity)
         {
-            TempData["Error"] = "Số lượng đăng ký không hợp lệ!";
+            TempData["Error"] = $"Số lượng tối thiểu là {campaign.MinQuantity}kg.";
             return RedirectToAction("Register", new { id = campaignId });
         }
 
+        // 3. Lưu vào Database (Giữ nguyên của Cảm)
         var registration = new RescueRegistration
         {
             CampaignID = campaignId,
-            CustomerID = customerId.Value, // Dùng .Value vì nó là int?
+            CustomerID = customerId.Value,
             Quantity = quantity,
             RegistrationDate = DateTime.Now,
             Status = "Pending"
@@ -123,7 +139,7 @@ public class RescueController : Controller
         _context.RescueRegistrations.Add(registration);
         await _context.SaveChangesAsync();
 
-        TempData["Success"] = "Cảm ơn bạn đã chung tay giải cứu nông sản!";
+        TempData["Success"] = "Xác nhận chung tay thành công!";
         return RedirectToAction("Index", "Home");
     }
 }

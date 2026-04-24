@@ -113,57 +113,90 @@
                                 <th class="ps-4">Mặt hàng giải cứu</th>
                                 <th>Lý do</th>
                                 <th>Giá giải cứu</th>
-                                <th>Min Mua</th>
                                 <th>Ngày Kết Thúc</th>
-                                <th class="text-end pe-4">Trạng thái</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end pe-4">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var rc in Model.RescueCampaigns)
                             {
-                                <tr>
+                                // Tính tổng số lượng khách đã đăng ký giúp (nếu có danh sách Registrations)
+                                var totalReg = rc.Registrations?.Sum(r => r.Quantity) ?? 0;
+                                var isExpired = rc.ExpectedHarvestDate.HasValue && rc.ExpectedHarvestDate < DateTime.Now;
+                                var isClosed = rc.Status == "Closed";
+
+                                <tr class="@(isClosed || isExpired ? "opacity-75" : "")">
                                     <td class="ps-4">
                                         <div class="fw-bold text-danger">@rc.ProductName</div>
-                                        <small class="text-muted">@rc.Category?.CategoryName</small>
+                                        <div class="small text-muted">@rc.Category?.CategoryName</div>
+                                        @* Hiển thị tiến độ gom hàng *@
+                                        <div class="mt-1">
+                                            <span class="badge bg-light text-success border border-success shadow-sm">
+                                                <i class="bi bi-people-fill"></i> Đã gom: <strong>@totalReg</strong> Kg
+                                            </span>
+                                        </div>
                                     </td>
-                                    <td><div class="text-truncate" style="max-width: 200px;">@rc.Reason</div></td>
-                                    <td><span class="fw-bold text-danger">@rc.Price.ToString("N0")₫</span></td>
-                                    <td><span class="badge bg-dark">@rc.MinQuantity KG</span></td>
 
-                                    @* Hiển thị Ngày kết thúc *@
+                                    <td><div class="text-truncate" style="max-width: 180px;" title="@rc.Reason">@rc.Reason</div></td>
+
+                                    <td>
+                                        <div class="fw-bold text-danger">@rc.Price.ToString("N0")₫</div>
+                                        <small class="text-muted">Tối thiểu: @rc.MinQuantity Kg</small>
+                                    </td>
+
+                                    @* Ngày kết thúc (Hiện cả Giờ:Phút) *@
                                     <td>
                                         @if (rc.ExpectedHarvestDate.HasValue)
                                         {
-                                            <div class="fw-bold @(rc.ExpectedHarvestDate < DateTime.Now ? "text-muted" : "text-dark")">
-                                                <i class="bi bi-calendar-event me-1"></i>
-                                                @rc.ExpectedHarvestDate.Value.ToString("dd/MM/yyyy")
+                                            <div class="fw-bold @(isExpired ? "text-muted" : "text-dark")">
+                                                <i class="bi bi-clock-fill me-1"></i> @rc.ExpectedHarvestDate.Value.ToString("HH:mm")
                                             </div>
-                                            @if (rc.ExpectedHarvestDate < DateTime.Now)
+                                            <div class="small">@rc.ExpectedHarvestDate.Value.ToString("dd/MM/yyyy")</div>
+
+                                            @if (!isExpired && !isClosed)
                                             {
-                                                <small class="text-danger fw-bold">(Đã hết hạn)</small>
+                                                var timeLeft = rc.ExpectedHarvestDate.Value - DateTime.Now;
+                                                <small class="text-primary fw-bold">
+                                                    (Còn @(timeLeft.Days > 0 ? timeLeft.Days + "n " : "") @timeLeft.Hours h @timeLeft.Minutes m)
+                                                </small>
                                             }
-                                            else
-                                            {
-                                                <small class="text-muted">Còn @((rc.ExpectedHarvestDate.Value - DateTime.Now).Days) ngày</small>
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">Chưa đặt hạn</span>
                                         }
                                     </td>
 
-                                    <td class="text-end pe-4">
-                                        @if (rc.ExpectedHarvestDate < DateTime.Now)
+                                    @* Trạng thái chi tiết *@
+                                    <td>
+                                        @if (isClosed)
                                         {
-                                            <span class="badge bg-secondary">Đã kết thúc</span>
+                                            <span class="badge bg-secondary"><i class="bi bi-lock-fill"></i> ĐÃ CHỐT ĐƠN</span>
+                                        }
+                                        else if (isExpired)
+                                        {
+                                            <span class="badge bg-dark">HẾT HẠN</span>
                                         }
                                         else
                                         {
-                                            <span class="badge @(rc.Status == "Active" ? "bg-success" : "bg-warning")">
-                                                @(rc.Status == "Active" ? "Đang chạy" : rc.Status)
-                                            </span>
+                                            <span class="badge bg-success shadow-sm">ĐANG CHẠY</span>
                                         }
+                                    </td>
+
+                                    @* Thao tác *@
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group">
+                                            @* Chỉ hiện nút Chốt đơn nếu đang Active và chưa hết hạn *@
+                                            @if (!isClosed && !isExpired)
+                                            {
+                                                <form asp-action="CloseCampaign" asp-controller="Seller" method="post"
+                                                      onsubmit="return confirm('Bạn muốn chốt đơn sớm chiến dịch này? Sau khi chốt khách sẽ không thể đăng ký thêm.')">
+                                                    <input type="hidden" name="id" value="@rc.CampaignID" />
+                                                    <button type="submit" class="btn btn-sm btn-danger px-3 shadow-sm" title="Chốt đơn sớm">
+                                                        <i class="bi bi-check-all"></i> CHỐT SỚM
+                                                    </button>
+                                                </form>
+                                            }
+                                            <a asp-action="EditCampaign" asp-controller="Rescue" asp-route-id="@rc.CampaignID"
+                                               class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i></a>
+                                        </div>
                                     </td>
                                 </tr>
                             }

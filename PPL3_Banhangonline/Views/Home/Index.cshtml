@@ -1,19 +1,25 @@
 ﻿@model List<PPL3_Banhangonline.Models.Category>
 @using Microsoft.AspNetCore.Http
+@using PPL3_Banhangonline.Models
 
 @{
     ViewData["Title"] = "Trang chủ";
     var username = Context.Session.GetString("Username");
     var role = Context.Session.GetString("Role");
 }
+
+@* Thêm thư viện SweetAlert2 và Icons *@
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="~/css/style.css" />
+
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success">@TempData["Success"]</div>
 }
-<link rel="stylesheet" href="~/css/style.css" />
 
 <div class="home-page">
-
+    @* --- HEADER (Giữ nguyên của bạn) --- *@
     <header class="home-header">
         <div class="my-container">
             <div class="topbar">
@@ -27,41 +33,19 @@
                     else
                     {
                         <span>Xin chào, <strong>@username</strong></span>
-
-                        @if (role == "admin")
-                        {
-                            <span>|</span>
-                            <a asp-controller="Admin" asp-action="Index">Quản trị</a>
-                        }
-                        @if (role == "seller")
-                        {
-                            <span>|</span>
-                            <a asp-controller="Seller" asp-action="Index">Cửa hàng</a>
-                        }
+                        @if (role == "admin") { <span>|</span> <a asp-controller="Admin" asp-action="Index">Quản trị</a> }
+                        @if (role == "seller") { <span>|</span> <a asp-controller="Seller" asp-action="Index">Cửa hàng</a> }
                         @if (role == "customer")
                         {
-                            <span>|</span>
-                            <a asp-controller="Cart" asp-action="Index">Giỏ hàng</a>
-                            <span>|</span>
-                            <a asp-controller="Customer" asp-action="Orders">Đơn đã mua</a>
-                            <span>|</span>
-                            <a asp-controller="Customer" asp-action="EditProfile">Thông tin cá nhân</a>
-                            <span>|</span>
-                            <a asp-controller="Seller" asp-action="RegisterSeller">Đăng ký Seller</a>
+                            <span>|</span> <a asp-controller="Cart" asp-action="Index">Giỏ hàng</a>
+                            <span>|</span> <a asp-controller="Customer" asp-action="Orders">Đơn đã mua</a>
+                            <span>|</span> <a asp-controller="Seller" asp-action="RegisterSeller">Đăng ký Seller</a>
                         }
-                        @if (role == "seller")
-                        {
-                            <span>|</span>
-                            <a asp-controller="Seller" asp-action="EditProfile">Thông tin cá nhân</a>
-                        }
-
-                        <span>|</span>
-                        <a asp-controller="Account" asp-action="Logout">Đăng xuất</a>
+                        <span>|</span> <a asp-controller="Account" asp-action="Logout">Đăng xuất</a>
                     }
                 </div>
             </div>
-
-            <div class="main-header">
+            <div class="main-header border-bottom pb-3">
                 <a asp-controller="Home" asp-action="Index" class="logo">
                     <div class="logo-box">G</div>
                     <div class="logo-text">
@@ -69,7 +53,6 @@
                         <span>Nông sản tươi mỗi ngày</span>
                     </div>
                 </a>
-
                 <form asp-controller="Product" asp-action="Search" method="get" class="search-area">
                     <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm..." />
                     <button type="submit">Tìm</button>
@@ -78,22 +61,18 @@
         </div>
     </header>
 
+    @* --- HERO SECTION (Giữ nguyên) --- *@
     <section class="hero-section">
         <div class="my-container">
             <div class="hero-content">
                 <div class="hero-text">
                     <span class="hero-badge">Sàn nông sản trực tuyến</span>
-                    <h1>Mua nông sản tươi sạch, nhanh chóng và tiện lợi</h1>
-                    <p>
-                        Khám phá các danh mục sản phẩm nổi bật, kết nối người mua với cửa hàng
-                        và hỗ trợ tiêu thụ nông sản hiệu quả.
-                    </p>
-                    <div class="hero-actions">
+                    <h1>Mua nông sản sạch, nhanh chóng và tiện lợi</h1>
+                    <div class="hero-actions mt-4">
                         <a href="#category-section" class="btn-main">Xem danh mục</a>
-                        <a href="#rescue-section" class="btn-outline">Xem sản phẩm cần giải cứu</a>
+                        <a href="#rescue-section" class="btn-outline">Sản phẩm giải cứu</a>
                     </div>
                 </div>
-
                 <div class="hero-image">
                     <img src="https://cdn-icons-png.flaticon.com/512/2153/2153788.png" alt="Nông sản" />
                 </div>
@@ -102,26 +81,19 @@
     </section>
 
     <main class="my-container">
-        <section class="category-section" id="category-section">
-            <div class="section-head">
-                <div>
-                    <p class="section-subtitle">Danh mục nổi bật</p>
-                    <h2 class="category-title">Danh mục sản phẩm</h2>
-                </div>
+        @* --- 1. SECTION DANH MỤC --- *@
+        <section class="category-section mt-5" id="category-section">
+            <div class="section-head mb-4">
+                <p class="section-subtitle text-success mb-1">Khám phá ngay</p>
+                <h2 class="fw-bold">Danh mục sản phẩm</h2>
             </div>
-
             <div class="category-list">
                 @if (Model != null && Model.Any())
                 {
                     @foreach (var item in Model)
                     {
-                        <a asp-controller="Product"
-                           asp-action="ByCategory"
-                           asp-route-id="@item.CategoryID"
-                           class="category-card">
-                            <div class="category-img-wrap">
-                                <img src="@item.Image" alt="@item.CategoryName" />
-                            </div>
+                        <a asp-controller="Product" asp-action="ByCategory" asp-route-id="@item.CategoryID" class="category-card">
+                            <div class="category-img-wrap"><img src="@item.Image" alt="@item.CategoryName" /></div>
                             <div class="category-info">
                                 <h3>@item.CategoryName</h3>
                                 <span>Xem sản phẩm</span>
@@ -129,37 +101,51 @@
                         </a>
                     }
                 }
-                else
-                {
-                    <p>Hiện chưa có danh mục nào.</p>
-                }
             </div>
+        </section>
+
+        @* --- 2. SECTION GIẢI CỨU (NÂNG CẤP) --- *@
+        <section class="rescue-section mt-5 pt-4" id="rescue-section">
             @if (ViewBag.RescueItems != null)
             {
                 var rescueList = (List<RescueCampaign>)ViewBag.RescueItems;
                 if (rescueList.Any())
                 {
-                    <div class="rescue-section py-4">
-                        <h2 class="text-danger fw-bold mb-4">📢 CHIẾN DỊCH GIẢI CỨU NÔNG SẢN</h2>
+                    <div class="p-4 rounded-4" style="background-color: #fff5f5; border: 2px dashed #dc3545;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="text-danger fw-bold m-0"><i class="bi bi- megaphone-fill"></i> CHIẾN DỊCH GIẢI CỨU NÔNG SẢN</h2>
+                            <span class="badge bg-danger rounded-pill px-3">Hỗ trợ nông dân</span>
+                        </div>
+                        
                         <div class="row">
                             @foreach (var item in rescueList)
                             {
                                 <div class="col-md-3 mb-4">
-                                    <div class="card h-100 border-danger shadow-sm">
-                                        <div class="card-header bg-danger text-white fw-bold text-center">
-                                            CẦN GIẢI CỨU
+                                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                                        <div class="card-header bg-danger text-white text-center py-2 fw-bold small">
+                                            ⏳ HẠN CỨU: @item.ExpectedHarvestDate?.ToString("HH:mm - dd/MM")
                                         </div>
-                                        <div class="card-body">
+                                        <div class="card-body p-3">
                                             <h5 class="card-title text-success fw-bold">@item.ProductName</h5>
-                                            <p class="card-text small text-muted">Lý do: @item.Reason</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <span class="text-danger fw-bold">@item.Price.ToString("N0")đ</span>
-                                                <span class="badge bg-light text-dark border">Min: @item.MinQuantity</span>
+                                            <p class="card-text small text-muted mb-2" style="height: 40px; overflow: hidden;">@item.Reason</p>
+                                            
+                                            <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded-3 mb-3">
+                                                <span class="text-danger fw-bold fs-5">@item.Price.ToString("N0")đ</span>
+                                                <span class="badge bg-white text-dark border">Min: @item.MinQuantity Kg</span>
                                             </div>
-                                        </div>
-                                        <div class="card-footer bg-transparent border-0">
-                                            <a href="@Url.Action("Register", "Rescue", new { id = item.CampaignID })"
-                                               class="btn btn-danger w-100 fw-bold">CHUNG TAY GIÚP ĐỠ</a>
+
+                                            @if (role?.ToLower() == "seller")
+                                            {
+                                                <button type="button" class="btn btn-danger w-100 fw-bold rounded-pill"
+                                                        onclick="Swal.fire('Thông báo', 'Người bán không thể tham gia giải cứu!', 'warning')">
+                                                    CHUNG TAY GIÚP ĐỠ
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <a href="@Url.Action("Register", "Rescue", new { id = item.CampaignID })"
+                                                   class="btn btn-danger w-100 fw-bold rounded-pill">CHUNG TAY GIÚP ĐỠ</a>
+                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -168,21 +154,6 @@
                     </div>
                 }
             }
-        </section>
-
-        <section class="rescue-section" id="rescue-section">
-            <div class="section-head">
-                <div>
-                    <p class="section-subtitle">Ưu tiên hỗ trợ</p>
-                    <h2 class="category-title">Các sản phẩm cần giải cứu</h2>
-                </div>
-            </div>
-
-            <div class="rescue-list">
-                <div class="empty-rescue-box">
-                    <p>Phần sản phẩm cần giải cứu sẽ được thêm sau.</p>
-                </div>
-            </div>
         </section>
     </main>
 </div>

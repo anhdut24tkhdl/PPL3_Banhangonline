@@ -137,6 +137,7 @@ namespace PPL3_Banhangonline.Controllers
             // 2. Lấy sản phẩm đang giải cứu
             var rescueCampaigns = _context.RescueCampaigns
                 .Include(rc => rc.Category)
+                .Include(rc => rc.Registrations)
                 .Where(rc => rc.ShopID == myShopId)
                 .ToList();
 
@@ -297,6 +298,43 @@ namespace PPL3_Banhangonline.Controllers
                 return RedirectToAction("ManageProducts");
             }
             return View(product);
+        }
+        [HttpPost]
+        public async Task<IActionResult> CloseCampaign(int id)
+        {
+            // 1. Lấy thông tin người dùng từ Session
+            var accountId = HttpContext.Session.GetInt32("AccountId");
+            if (accountId == null) return RedirectToAction("Login", "Account");
+
+            // 2. Tìm thông tin Seller và Shop của họ
+            var seller = await _context.Sellers
+                .Include(s => s.Shop)
+                .FirstOrDefaultAsync(s => s.UserID == accountId);
+
+            if (seller?.Shop == null) return RedirectToAction("Index", "Home");
+
+            // 3. Tìm chiến dịch cần chốt
+            var campaign = await _context.RescueCampaigns.FindAsync(id);
+
+            // 4. Kiểm tra: Phải đúng là chiến dịch của Shop này mới được chốt
+            if (campaign != null && campaign.ShopID == seller.Shop.ShopID)
+            {
+                // Cập nhật trạng thái
+                campaign.Status = "Closed";
+
+                // (Tùy chọn) Cập nhật luôn thời gian kết thúc về hiện tại để đồng hồ đếm ngược dừng lại
+                campaign.ExpectedHarvestDate = DateTime.Now;
+
+                await _context.SaveChangesAsync();
+                TempData["Success"] = $"Chiến dịch '{campaign.ProductName}' đã được chốt đơn thành công!";
+            }
+            else
+            {
+                TempData["Error"] = "Thao tác không hợp lệ hoặc bạn không có quyền chốt chiến dịch này.";
+            }
+
+            // 5. Quay về trang quản lý của Seller
+            return RedirectToAction("ManageProducts", "Seller");
         }
         [HttpGet]
         public IActionResult CreateProduct()
