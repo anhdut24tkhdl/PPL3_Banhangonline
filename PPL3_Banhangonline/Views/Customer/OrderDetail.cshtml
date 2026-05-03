@@ -25,6 +25,20 @@
         <a asp-action="Orders" class="btn btn-outline-secondary">Quay lai</a>
     </div>
 
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
     <div class="card shadow-sm border-0 p-3 mb-4">
         <div class="row g-3">
             <div class="col-md-4">
@@ -50,6 +64,7 @@
                             <th class="text-center">So luong</th>
                             <th class="text-end">Don gia</th>
                             <th class="text-end">Thanh tien</th>
+                            <th class="text-center">Danh gia</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -60,6 +75,24 @@
                                 <td class="text-center">@item.Quantity</td>
                                 <td class="text-end">@item.UnitPrice?.ToString("N0") đ</td>
                                 <td class="text-end fw-semibold">@((item.UnitPrice * item.Quantity)?.ToString("N0")) đ</td>
+                                <td class="text-center">
+                                    @if (Model.Status == "Delivered")
+                                    {
+                                        <a asp-controller="Customer"
+                                               asp-action="ReviewProduct"
+                                               asp-route-orderId="@Model.OrderID"
+                                               asp-route-productId="@item.ProductID"
+                                               class="btn btn-sm btn-warning">
+                                            Đánh giá
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">
+                                            Chỉ đánh giá sau khi đã giao
+                                        </span>
+                                    }
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -67,6 +100,7 @@
                         <tr>
                             <th colspan="3" class="text-end">Tong cong</th>
                             <th class="text-end text-danger">@Model.TotalAmount?.ToString("N0") đ</th>
+                            <th></th>
                         </tr>
                     </tfoot>
                 </table>

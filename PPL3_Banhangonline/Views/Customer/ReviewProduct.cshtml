@@ -1,0 +1,40 @@
+﻿@model PPL3_Banhangonline.Models.Viewmodels.ReviewViewModel
+
+<h2>Đánh giá sản phẩm</h2>
+
+<div class="card p-4">
+    <h4>@Model.ProductName</h4>
+
+    <form asp-action="ReviewProduct" method="post">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="OrderID" />
+        <input type="hidden" asp-for="ProductID" />
+
+        <div class="mb-3">
+            <label asp-for="Rating" class="form-label">Số sao</label>
+            <select asp-for="Rating" class="form-control">
+                <option value="">-- Chọn số sao --</option>
+                <option value="5">⭐⭐⭐⭐⭐ - Rất tốt</option>
+                <option value="4">⭐⭐⭐⭐ - Tốt</option>
+                <option value="3">⭐⭐⭐ - Bình thường</option>
+                <option value="2">⭐⭐ - Không hài lòng</option>
+                <option value="1">⭐ - Tệ</option>
+            </select>
+            <span asp-validation-for="Rating" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Comment" class="form-label">Bình luận</label>
+            <textarea asp-for="Comment" class="form-control" rows="4"></textarea>
+            <span asp-validation-for="Comment" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-success">Gửi đánh giá</button>
+        <a asp-action="OrderDetail" asp-route-id="@Model.OrderID" class="btn btn-secondary">Quay lại</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

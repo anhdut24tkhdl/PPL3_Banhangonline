@@ -240,10 +240,16 @@ namespace PPL3_Banhangonline.Controllers
                 .Include(p => p.Category)
                 .Include(p => p.Shop)
                     .ThenInclude(s => s.Seller)
+                .Include(p => p.Reviews)
+                    .ThenInclude(r => r.Customer)
                 .FirstOrDefault(p => p.ProductID == id);
 
             if (product == null)
                 return Content("Không tìm thấy sản phẩm.");
+
+            ViewBag.AverageRating = product.Reviews.Any()
+                ? product.Reviews.Average(r => r.Rating)
+                : 0;
 
             return View(product);
         }

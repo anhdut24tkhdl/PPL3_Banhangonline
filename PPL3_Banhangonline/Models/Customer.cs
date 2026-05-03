@@ -16,5 +16,7 @@ namespace PPL3_Banhangonline.Models
         public Account? Account { get; set; }
         public Cart? Cart { get; set; }
         public ICollection<Order> Orders { get; set; } = new List<Order>();
+
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }

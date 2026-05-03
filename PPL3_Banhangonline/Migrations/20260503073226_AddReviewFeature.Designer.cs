@@ -12,8 +12,8 @@ using PPL3_Banhangonline.Database;
 namespace PPL3_Banhangonline.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260408093521_banhangonline")]
-    partial class banhangonline
+    [Migration("20260503073226_AddReviewFeature")]
+    partial class AddReviewFeature
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,7 +47,7 @@ namespace PPL3_Banhangonline.Migrations
 
                     b.HasKey("AccountId");
 
-                    b.ToTable("Account");
+                    b.ToTable("Account", (string)null);
                 });
 
             modelBuilder.Entity("PPL3_Banhangonline.Models.Cart", b =>
@@ -117,7 +117,7 @@ namespace PPL3_Banhangonline.Migrations
 
                     b.HasKey("CategoryID");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("PPL3_Banhangonline.Models.Customer", b =>
@@ -178,7 +178,7 @@ namespace PPL3_Banhangonline.Migrations
 
                     b.HasIndex("CustomerID");
 
-                    b.ToTable("Order");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("PPL3_Banhangonline.Models.OrderDetail", b =>
@@ -200,7 +200,7 @@ namespace PPL3_Banhangonline.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("OrderDetail");
+                    b.ToTable("OrderDetails", (string)null);
                 });
 
             modelBuilder.Entity("PPL3_Banhangonline.Models.Payment", b =>
@@ -232,7 +232,7 @@ namespace PPL3_Banhangonline.Migrations
                     b.HasIndex("OrderID")
                         .IsUnique();
 
-                    b.ToTable("Payment");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("PPL3_Banhangonline.Models.Price", b =>
@@ -295,7 +295,129 @@ namespace PPL3_Banhangonline.Migrations
 
                     b.HasIndex("ShopID");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
+                });
+
+            modelBuilder.Entity("PPL3_Banhangonline.Models.RescueCampaign", b =>
+                {
+                    b.Property<int>("CampaignID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CampaignID"));
+
+                    b.Property<int>("CategoryID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ExpectedHarvestDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MinQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ShopID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("CampaignID");
+
+                    b.HasIndex("CategoryID");
+
+                    b.HasIndex("ShopID");
+
+                    b.ToTable("RescueCampaigns");
+                });
+
+            modelBuilder.Entity("PPL3_Banhangonline.Models.RescueRegistration", b =>
+                {
+                    b.Property<int>("RegistrationID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RegistrationID"));
+
+                    b.Property<int>("CampaignID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CustomerID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("RegistrationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RegistrationID");
+
+                    b.HasIndex("CampaignID");
+
+                    b.HasIndex("CustomerID");
+
+                    b.ToTable("RescueRegistrations");
+                });
+
+            modelBuilder.Entity("PPL3_Banhangonline.Models.Review", b =>
+                {
+                    b.Property<int>("ReviewID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewID"));
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CustomerID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.HasKey("ReviewID");
+
+                    b.HasIndex("OrderID");
+
+                    b.HasIndex("ProductID");
+
+                    b.HasIndex("CustomerID", "ProductID", "OrderID")
+                        .IsUnique();
+
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("PPL3_Banhangonline.Models.Seller", b =>
@@ -465,6 +587,71 @@ namespace PPL3_Banhangonline.Migrations
                     b.Navigation("Shop");
                 });
 
+            modelBuilder.Entity("PPL3_Banhangonline.Models.RescueCampaign", b =>
+                {
+                    b.HasOne("PPL3_Banhangonline.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PPL3_Banhangonline.Models.Shop", "Shop")
+                        .WithMany()
+                        .HasForeignKey("ShopID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Shop");
+                });
+
+            modelBuilder.Entity("PPL3_Banhangonline.Models.RescueRegistration", b =>
+                {
+                    b.HasOne("PPL3_Banhangonline.Models.RescueCampaign", "Campaign")
+                        .WithMany("Registrations")
+                        .HasForeignKey("CampaignID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("PPL3_Banhangonline.Models.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Campaign");
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("PPL3_Banhangonline.Models.Review", b =>
+                {
+                    b.HasOne("PPL3_Banhangonline.Models.Customer", "Customer")
+                        .WithMany("Reviews")
+                        .HasForeignKey("CustomerID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PPL3_Banhangonline.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PPL3_Banhangonline.Models.Product", "Product")
+                        .WithMany("Reviews")
+                        .HasForeignKey("ProductID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("PPL3_Banhangonline.Models.Seller", b =>
                 {
                     b.HasOne("PPL3_Banhangonline.Models.Account", "Account")
@@ -502,6 +689,8 @@ namespace PPL3_Banhangonline.Migrations
                     b.Navigation("Cart");
 
                     b.Navigation("Orders");
+
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("PPL3_Banhangonline.Models.Order", b =>
@@ -516,6 +705,13 @@ namespace PPL3_Banhangonline.Migrations
                     b.Navigation("CartItems");
 
                     b.Navigation("OrderDetails");
+
+                    b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("PPL3_Banhangonline.Models.RescueCampaign", b =>
+                {
+                    b.Navigation("Registrations");
                 });
 
             modelBuilder.Entity("PPL3_Banhangonline.Models.Seller", b =>

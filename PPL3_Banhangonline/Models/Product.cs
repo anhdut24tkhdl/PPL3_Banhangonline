@@ -19,5 +19,7 @@ namespace PPL3_Banhangonline.Models
 
         public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }

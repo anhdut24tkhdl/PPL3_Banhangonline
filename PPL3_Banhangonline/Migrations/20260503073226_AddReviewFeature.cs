@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PPL3_Banhangonline.Migrations
 {
     /// <inheritdoc />
-    public partial class banhangonline : Migration
+    public partial class AddReviewFeature : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -109,7 +109,7 @@ namespace PPL3_Banhangonline.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Order",
+                name: "Orders",
                 columns: table => new
                 {
                     OrderID = table.Column<int>(type: "int", nullable: false)
@@ -121,9 +121,9 @@ namespace PPL3_Banhangonline.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Order", x => x.OrderID);
+                    table.PrimaryKey("PK_Orders", x => x.OrderID);
                     table.ForeignKey(
-                        name: "FK_Order_Customers_CustomerID",
+                        name: "FK_Orders_Customers_CustomerID",
                         column: x => x.CustomerID,
                         principalTable: "Customers",
                         principalColumn: "CustomerID",
@@ -151,7 +151,7 @@ namespace PPL3_Banhangonline.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Payment",
+                name: "Payments",
                 columns: table => new
                 {
                     PaymentID = table.Column<int>(type: "int", nullable: false)
@@ -164,11 +164,11 @@ namespace PPL3_Banhangonline.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Payment", x => x.PaymentID);
+                    table.PrimaryKey("PK_Payments", x => x.PaymentID);
                     table.ForeignKey(
-                        name: "FK_Payment_Order_OrderID",
+                        name: "FK_Payments_Orders_OrderID",
                         column: x => x.OrderID,
-                        principalTable: "Order",
+                        principalTable: "Orders",
                         principalColumn: "OrderID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -205,6 +205,40 @@ namespace PPL3_Banhangonline.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RescueCampaigns",
+                columns: table => new
+                {
+                    CampaignID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CategoryID = table.Column<int>(type: "int", nullable: false),
+                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    MinQuantity = table.Column<int>(type: "int", nullable: false),
+                    ExpectedHarvestDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ShopID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RescueCampaigns", x => x.CampaignID);
+                    table.ForeignKey(
+                        name: "FK_RescueCampaigns_Categories_CategoryID",
+                        column: x => x.CategoryID,
+                        principalTable: "Categories",
+                        principalColumn: "CategoryID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RescueCampaigns_Shops_ShopID",
+                        column: x => x.ShopID,
+                        principalTable: "Shops",
+                        principalColumn: "ShopID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CartItems",
                 columns: table => new
                 {
@@ -233,7 +267,7 @@ namespace PPL3_Banhangonline.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OrderDetail",
+                name: "OrderDetails",
                 columns: table => new
                 {
                     OrderID = table.Column<int>(type: "int", nullable: false),
@@ -243,15 +277,15 @@ namespace PPL3_Banhangonline.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderDetail", x => new { x.OrderID, x.ProductID });
+                    table.PrimaryKey("PK_OrderDetails", x => new { x.OrderID, x.ProductID });
                     table.ForeignKey(
-                        name: "FK_OrderDetail_Order_OrderID",
+                        name: "FK_OrderDetails_Orders_OrderID",
                         column: x => x.OrderID,
-                        principalTable: "Order",
+                        principalTable: "Orders",
                         principalColumn: "OrderID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_OrderDetail_Products_ProductID",
+                        name: "FK_OrderDetails_Products_ProductID",
                         column: x => x.ProductID,
                         principalTable: "Products",
                         principalColumn: "ProductID",
@@ -279,6 +313,69 @@ namespace PPL3_Banhangonline.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Reviews",
+                columns: table => new
+                {
+                    ReviewID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductID = table.Column<int>(type: "int", nullable: false),
+                    CustomerID = table.Column<int>(type: "int", nullable: false),
+                    OrderID = table.Column<int>(type: "int", nullable: false),
+                    Rating = table.Column<int>(type: "int", nullable: false),
+                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reviews", x => x.ReviewID);
+                    table.ForeignKey(
+                        name: "FK_Reviews_Customers_CustomerID",
+                        column: x => x.CustomerID,
+                        principalTable: "Customers",
+                        principalColumn: "CustomerID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Reviews_Orders_OrderID",
+                        column: x => x.OrderID,
+                        principalTable: "Orders",
+                        principalColumn: "OrderID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Reviews_Products_ProductID",
+                        column: x => x.ProductID,
+                        principalTable: "Products",
+                        principalColumn: "ProductID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RescueRegistrations",
+                columns: table => new
+                {
+                    RegistrationID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CampaignID = table.Column<int>(type: "int", nullable: false),
+                    CustomerID = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RescueRegistrations", x => x.RegistrationID);
+                    table.ForeignKey(
+                        name: "FK_RescueRegistrations_Customers_CustomerID",
+                        column: x => x.CustomerID,
+                        principalTable: "Customers",
+                        principalColumn: "CustomerID");
+                    table.ForeignKey(
+                        name: "FK_RescueRegistrations_RescueCampaigns_CampaignID",
+                        column: x => x.CampaignID,
+                        principalTable: "RescueCampaigns",
+                        principalColumn: "CampaignID");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_CartItems_CartID",
                 table: "CartItems",
@@ -301,18 +398,18 @@ namespace PPL3_Banhangonline.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Order_CustomerID",
-                table: "Order",
-                column: "CustomerID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OrderDetail_ProductID",
-                table: "OrderDetail",
+                name: "IX_OrderDetails_ProductID",
+                table: "OrderDetails",
                 column: "ProductID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Payment_OrderID",
-                table: "Payment",
+                name: "IX_Orders_CustomerID",
+                table: "Orders",
+                column: "CustomerID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payments_OrderID",
+                table: "Payments",
                 column: "OrderID",
                 unique: true);
 
@@ -330,6 +427,42 @@ namespace PPL3_Banhangonline.Migrations
                 name: "IX_Products_ShopID",
                 table: "Products",
                 column: "ShopID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RescueCampaigns_CategoryID",
+                table: "RescueCampaigns",
+                column: "CategoryID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RescueCampaigns_ShopID",
+                table: "RescueCampaigns",
+                column: "ShopID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RescueRegistrations_CampaignID",
+                table: "RescueRegistrations",
+                column: "CampaignID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RescueRegistrations_CustomerID",
+                table: "RescueRegistrations",
+                column: "CustomerID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_CustomerID_ProductID_OrderID",
+                table: "Reviews",
+                columns: new[] { "CustomerID", "ProductID", "OrderID" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_OrderID",
+                table: "Reviews",
+                column: "OrderID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_ProductID",
+                table: "Reviews",
+                column: "ProductID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Sellers_UserID",
@@ -350,19 +483,28 @@ namespace PPL3_Banhangonline.Migrations
                 name: "CartItems");
 
             migrationBuilder.DropTable(
-                name: "OrderDetail");
+                name: "OrderDetails");
 
             migrationBuilder.DropTable(
-                name: "Payment");
+                name: "Payments");
 
             migrationBuilder.DropTable(
                 name: "Prices");
 
             migrationBuilder.DropTable(
+                name: "RescueRegistrations");
+
+            migrationBuilder.DropTable(
+                name: "Reviews");
+
+            migrationBuilder.DropTable(
                 name: "Carts");
 
             migrationBuilder.DropTable(
-                name: "Order");
+                name: "RescueCampaigns");
+
+            migrationBuilder.DropTable(
+                name: "Orders");
 
             migrationBuilder.DropTable(
                 name: "Products");

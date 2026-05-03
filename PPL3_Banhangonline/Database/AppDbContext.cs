@@ -22,6 +22,29 @@ namespace PPL3_Banhangonline.Database
             modelBuilder.Entity<Account>().ToTable("Account");
 
             // AppDbContext.cs
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Product)
+                .WithMany(p => p.Reviews)
+                .HasForeignKey(r => r.ProductID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Customer)
+                .WithMany(c => c.Reviews)
+                .HasForeignKey(r => r.CustomerID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Order)
+                .WithMany()
+                .HasForeignKey(r => r.OrderID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Review>()
+                .HasIndex(r => new { r.CustomerID, r.ProductID, r.OrderID })
+                .IsUnique();
+
             modelBuilder.Entity<RescueRegistration>()
                 .HasOne(r => r.Campaign)
                 .WithMany(c => c.Registrations)
@@ -105,6 +128,8 @@ namespace PPL3_Banhangonline.Database
         public DbSet<Payment> Payments { get; set; }
         public DbSet<RescueCampaign> RescueCampaigns { get; set; }
         public DbSet<RescueRegistration> RescueRegistrations { get; set; }
+
+        public DbSet<Review> Reviews { get; set; }
         public object Accounts { get; internal set; }
     }
 }

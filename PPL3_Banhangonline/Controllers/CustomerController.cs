@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PPL3_Banhangonline.Database;
 using PPL3_Banhangonline.Models.Viewmodels;
+using PPL3_Banhangonline.Models;
 
 namespace PPL3_Banhangonline.Controllers
 {
@@ -170,6 +171,116 @@ namespace PPL3_Banhangonline.Controllers
 
             TempData["Success"] = "Cập nhật thông tin thành công.";
             return RedirectToAction(nameof(EditProfile));
+        }
+        [HttpGet]
+        public IActionResult ReviewProduct(int orderId, int productId)
+        {
+            if (KiemTraCustomer() != null)
+                return KiemTraCustomer()!;
+
+            var accountId = HttpContext.Session.GetInt32("AccountId")!.Value;
+            var customer = _context.Customers.FirstOrDefault(c => c.UserID == accountId);
+
+            if (customer == null)
+                return RedirectToAction("Index", "Home");
+
+            var order = _context.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Product)
+                .FirstOrDefault(o => o.OrderID == orderId && o.CustomerID == customer.CustomerID);
+
+            if (order == null)
+                return NotFound();
+
+            if (order.Status != "Delivered")
+            {
+                TempData["Error"] = "Bạn chỉ có thể đánh giá sau khi đơn hàng đã giao thành công.";
+                return RedirectToAction("OrderDetail", new { id = orderId });
+            }
+
+            var orderDetail = order.OrderDetails.FirstOrDefault(od => od.ProductID == productId);
+            if (orderDetail == null)
+                return NotFound();
+
+            var existedReview = _context.Reviews.Any(r =>
+                r.CustomerID == customer.CustomerID &&
+                r.ProductID == productId &&
+                r.OrderID == orderId);
+
+            if (existedReview)
+            {
+                TempData["Error"] = "Bạn đã đánh giá sản phẩm này rồi.";
+                return RedirectToAction("OrderDetail", new { id = orderId });
+            }
+
+            var model = new ReviewViewModel
+            {
+                OrderID = orderId,
+                ProductID = productId,
+                ProductName = orderDetail.Product?.ProductName
+            };
+
+            return View(model);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ReviewProduct(ReviewViewModel model)
+        {
+            if (KiemTraCustomer() != null)
+                return KiemTraCustomer()!;
+
+            var accountId = HttpContext.Session.GetInt32("AccountId")!.Value;
+            var customer = _context.Customers.FirstOrDefault(c => c.UserID == accountId);
+
+            if (customer == null)
+                return RedirectToAction("Index", "Home");
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var order = _context.Orders
+                .Include(o => o.OrderDetails)
+                .FirstOrDefault(o => o.OrderID == model.OrderID && o.CustomerID == customer.CustomerID);
+
+            if (order == null)
+                return NotFound();
+
+            if (order.Status != "Delivered")
+            {
+                TempData["Error"] = "Bạn chỉ có thể đánh giá sau khi đơn hàng đã giao thành công.";
+                return RedirectToAction("OrderDetail", new { id = model.OrderID });
+            }
+
+            var hasProduct = order.OrderDetails.Any(od => od.ProductID == model.ProductID);
+            if (!hasProduct)
+                return NotFound();
+
+            var existedReview = _context.Reviews.Any(r =>
+                r.CustomerID == customer.CustomerID &&
+                r.ProductID == model.ProductID &&
+                r.OrderID == model.OrderID);
+
+            if (existedReview)
+            {
+                TempData["Error"] = "Bạn đã đánh giá sản phẩm này rồi.";
+                return RedirectToAction("OrderDetail", new { id = model.OrderID });
+            }
+
+            var review = new Review
+            {
+                CustomerID = customer.CustomerID,
+                ProductID = model.ProductID,
+                OrderID = model.OrderID,
+                Rating = model.Rating,
+                Comment = model.Comment,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Reviews.Add(review);
+            _context.SaveChanges();
+
+            TempData["Success"] = "Đánh giá sản phẩm thành công.";
+            return RedirectToAction("OrderDetail", new { id = model.OrderID });
         }
     }
 }
